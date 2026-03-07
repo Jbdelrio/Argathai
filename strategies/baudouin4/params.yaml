@@ -1,0 +1,8 @@
+# Default params for baudouin4 (microstructure mean-reversion)
+warmup: 3600
+decision_step: 600
+cooldown_sec: 1800
+horizon_sec: 21600
+tp_pct: 0.0075
+sl_pct: 0.0035
+persist_k: 2

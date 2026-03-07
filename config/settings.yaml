@@ -2,8 +2,9 @@ capital_usd: 1500.0
 leverage: 3
 risk_per_trade: 0.02
 max_position_pct: 0.30
+
 data:
   btc_path: "data/binance_spot/btc_1s.csv.gz"
   eth_path: "data/binance_spot/eth_1s.csv.gz"
-  btc_path_local: 'C:\Users\jeanb\Documents\hyperstat-arb-bot\analysis_ops\data_binance\spot\btc_1s.csv.gz'
-  eth_path_local: 'C:\Users\jeanb\Documents\hyperstat-arb-bot\analysis_ops\data_binance\spot\eth_1s.csv.gz'
+  # Optional extra data directories (portable, no hardcoded machine path)
+  search_paths: []
