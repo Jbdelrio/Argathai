@@ -1,0 +1,9 @@
+# Default params for innocent3 (BTC-ETH stat arb)
+warmup: 604800
+decision_step: 600
+cooldown_sec: 1800
+coint_window: 604800
+entry_z: 2.0
+exit_z: 0.5
+tp_pct: 0.0075
+sl_pct: 0.0035
