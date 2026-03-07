@@ -1,0 +1,38 @@
+# Urbain2 — residual alt rotation
+warmup: 7200
+decision_step: 3600
+cooldown_sec: 14400
+
+# Residual model
+reg_window: 7200
+momentum_window: 3600
+
+# Confirmation features
+oi_window: 1440
+funding_window: 1440
+liq_window: 1440
+funding_eta: 0.15
+oi_confirmation_floor: 0.0
+
+# Regime
+regime_ref_window: 7200
+disp_window: 1800
+
+# Score weights
+theta_m: 1.0
+theta_oi: 0.6
+theta_funding: 0.4
+theta_liq: 0.5
+lambda_uncertainty: 0.75
+uncertainty_window: 1800
+
+# Cost-aware gate
+tau: 1.0
+kappa_cost: 3.0
+taker_fee_rt: 0.0009
+slippage_bps: 1.5
+
+# Risk
+# Wider TP than SL for continuation profile
+tp_pct: 0.010
+sl_pct: 0.006

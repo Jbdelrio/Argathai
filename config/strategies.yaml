@@ -1,5 +1,6 @@
 capital_usd: 1500.0
 
 active_strategies:
-  baudouin4: 0.60
-  innocent3: 0.40
+  baudouin4: 0.45
+  innocent3: 0.35
+  urbain2: 0.20
