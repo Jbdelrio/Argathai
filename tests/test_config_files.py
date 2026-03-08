@@ -19,13 +19,13 @@ class TestConfigFiles(unittest.TestCase):
         self.assertIn('hyperliquid', data)
         self.assertIn('bitget_futures', data)
 
-
-    def test_settings_has_history_fetch_config(self):
+    def test_settings_data_section_exists(self):
         p = Path('config/settings.yaml')
         self.assertTrue(p.exists())
         data = yaml.safe_load(p.read_text(encoding='utf-8')) or {}
-        self.assertIn('history_fetch', data)
-        self.assertIn('enabled', data['history_fetch'])
+        self.assertIn('data', data)
+        self.assertIn('btc_path', data['data'])
+        self.assertIn('eth_path', data['data'])
 
     def test_settings_history_fetch_if_present_is_well_formed(self):
         """Backward-compatible: history_fetch is optional in some user configs."""
