@@ -226,6 +226,13 @@ $$
 avec $c_{i,t}$ coût attendu (fees + spread + slippage proxy).
 
 ---
+## Live dashboard (Dash) — améliorations
+- Thème sombre complet (fond noir).
+- Start/Stop **global** et **individuel** par stratégie.
+- Barre de warmup par stratégie (progression en secondes vers le minimum requis).
+- Sélection multi-coins depuis l’univers disponible exchange (quand connecté).
+- Vue des positions live par stratégie.
+- Export manuel des résultats de trading en CSV (`results/live_trades_*.csv`).
 
 ## Configuration
 - `config/strategies.yaml`: stratégies actives + allocation.

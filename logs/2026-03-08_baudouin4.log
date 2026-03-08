@@ -1,2 +1,10 @@
 [2026-03-08 01:00:08] [baudouin4] [INFO] Capital allocated: $675
 [2026-03-08 01:00:11] [baudouin4] [INFO] Capital allocated: $675
+[2026-03-08 02:38:50] [baudouin4] [INFO] Capital allocated: $675
+[2026-03-08 02:38:52] [baudouin4] [INFO] Capital allocated: $675
+[2026-03-08 02:39:45] [baudouin4] [INFO] Exchange client set: HyperliquidClient
+[2026-03-08 02:39:50] [baudouin4] [INFO] Mode: LIVE
+[2026-03-08 02:44:36] [baudouin4] [INFO] Mode: LIVE
+[2026-03-08 02:44:40] [baudouin4] [INFO] Mode: BACKTEST
+[2026-03-08 02:45:02] [baudouin4] [INFO] Mode: BACKTEST
+[2026-03-08 02:45:07] [baudouin4] [INFO] Mode: BACKTEST

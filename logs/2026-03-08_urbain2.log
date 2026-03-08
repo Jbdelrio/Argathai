@@ -1,2 +1,10 @@
 [2026-03-08 01:00:09] [urbain2] [INFO] Capital allocated: $300
 [2026-03-08 01:00:11] [urbain2] [INFO] Capital allocated: $300
+[2026-03-08 02:38:50] [urbain2] [INFO] Capital allocated: $300
+[2026-03-08 02:38:52] [urbain2] [INFO] Capital allocated: $300
+[2026-03-08 02:39:45] [urbain2] [INFO] Exchange client set: HyperliquidClient
+[2026-03-08 02:39:50] [urbain2] [INFO] Mode: LIVE
+[2026-03-08 02:44:37] [urbain2] [INFO] Mode: LIVE
+[2026-03-08 02:44:40] [urbain2] [INFO] Mode: BACKTEST
+[2026-03-08 02:45:02] [urbain2] [INFO] Mode: BACKTEST
+[2026-03-08 02:45:07] [urbain2] [INFO] Mode: BACKTEST
