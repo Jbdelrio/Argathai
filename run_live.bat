@@ -1,5 +1,5 @@
 @echo off
-echo Agarthai — Live Trading (Streamlit)
+echo Agarthai — Live Trading (Dash)
 cd /d "%~dp0"
-streamlit run gui/live_app.py --server.port 8502
+python live/dashboard.py
 pause

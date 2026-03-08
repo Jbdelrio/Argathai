@@ -20,5 +20,13 @@ class TestConfigFiles(unittest.TestCase):
         self.assertIn('bitget_futures', data)
 
 
+    def test_settings_has_history_fetch_config(self):
+        p = Path('config/settings.yaml')
+        self.assertTrue(p.exists())
+        data = yaml.safe_load(p.read_text(encoding='utf-8')) or {}
+        self.assertIn('history_fetch', data)
+        self.assertIn('enabled', data['history_fetch'])
+
+
 if __name__ == '__main__':
     unittest.main()
