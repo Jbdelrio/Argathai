@@ -66,7 +66,7 @@ Agarthai/
     ├── test_metrics.py
     └── test_urbain2.py
 ```
-```
+
 ## Allocation active
 | Code | Type | Allocation cible | Rôle portefeuille |
 |------|------|------------------|-------------------|
@@ -85,21 +85,27 @@ Agarthai/
 Variables principales (fenêtres courte/moyenne/longue : `w_s`, `w_m`, `w_l`) :
 
 - Retour cumulé :
+
   $$
   R_{w_s}(t)=\sum_{j=t-w_s+1}^{t} r_j
   $$
+
 - Activité volume/transactions : $V_{w_s}(t),N_{w_s}(t)$
 - Impulsion :
+
   $$
   I_t = \frac{|R_{w_s}(t)|}{\sigma_{w_l}(t)+\varepsilon}
         \cdot \frac{V_{w_s}(t)}{\text{med}_{w_l}(V_{w_s})+\varepsilon}
         \cdot \frac{N_{w_s}(t)}{\text{med}_{w_l}(N_{w_s})+\varepsilon}
   $$
+
 - Compression de volatilité :
+
   $$
   S_t = \frac{\sigma_{w_s}(t)}{\sigma_{w_m}(t)+\varepsilon}
   $$
 - Score d’épuisement robuste :
+
   $$
   E_t^* = z_r(I_t) + z_r(C_t) + z_r(A_t) + z_r(-S_t)
   $$
@@ -114,18 +120,22 @@ Variables principales (fenêtres courte/moyenne/longue : `w_s`, `w_m`, `w_l`) :
 **Intuition :** trader la réversion d’un spread cointegré BTC/ETH, filtré par divergence de flux (OFI).
 
 - Couverture dynamique :
+
   $$
   \beta_t \approx \frac{\text{Cov}(\log P_{BTC},\log P_{ETH})}{\text{Var}(\log P_{BTC})}
   $$
 - Spread :
+
   $$
   s_t = \log P_{ETH,t} - \beta_t\log P_{BTC,t}
   $$
 - Modèle OU local :
+
   $$
   ds_t = \kappa_t(\mu_t - s_t)dt + \sigma_t dW_t
   $$
 - Z-score du spread :
+
   $$
   z_t = \frac{s_t-\mu_t}{\sigma_t+\varepsilon}
   $$
@@ -141,6 +151,7 @@ Variables principales (fenêtres courte/moyenne/longue : `w_s`, `w_m`, `w_l`) :
 #### 3.1 Neutralisation factorielle
 
 Pour chaque actif alt $i$, on approxime :
+
 $$
 r_{i,t} = \alpha_i + \beta_{i,B}r^{BTC}_t + \beta_{i,E}r^{ETH}_t + \sum_{k=1}^{K}\beta_{i,k}PC_{k,t} + u_{i,t}
 $$
@@ -149,41 +160,51 @@ Le signal travaille sur le **résidu** $u_{i,t}$.
 Dans l’implémentation actuelle (single-symbol), les facteurs communs sont pris depuis colonnes dédiées si disponibles (`btc_ret_1h`, `eth_ret_1h`, `alt_pca1`) avec fallback robuste sinon.
 
 #### 3.2 Momentum résiduel
+
 $$
 m_{i,t} = \frac{\sum_{h=1}^{H_m}u_{i,t-h}}{\hat{\sigma}_{u,i,t}\sqrt{H_m}+\varepsilon}
 $$
 
 #### 3.3 Confirmation OI
+
 $$
 o_{i,t} = z_r\big(\Delta\log OI_{i,t}\big)
 $$
 
 #### 3.4 Funding : bonus modéré + pénalité crowding
+
 $$
 \phi_{i,t}=\operatorname{sign}(m_{i,t})\,z_r(F_{i,t})-\eta\,z_r(F_{i,t})^2
 $$
 
 #### 3.5 Qualité de liquidité
+
 $$
 \ell_{i,t}=z_r(\log ADV_{i,t})-z_r(spread_{i,t})-z_r(impact_{i,t})
 $$
 
 #### 3.6 Gate de régime
+
 $$
 G_t=\mathbf{1}\left[\text{Disp}(u_t)>Q_{0.6}(\text{Disp})\;\land\;|r^{BTC}_t|<Q_{0.9}(|r^{BTC}|)\right]
 $$
 
 #### 3.7 Score final cost-aware et uncertainty-aware
+
 $$
 s_{i,t}=G_t\big(\theta_1m_{i,t}+\theta_2o_{i,t}+\theta_3\phi_{i,t}+\theta_4\ell_{i,t}\big)
 $$
+
 $$
 s^*_{i,t}=s_{i,t}-\lambda q_{i,t}
 $$
+
 Entrée seulement si :
+
 $$
 |s^*_{i,t}|>\tau+\kappa c_{i,t}
 $$
+
 avec $c_{i,t}$ coût attendu (fees + spread + slippage proxy).
 
 ---
