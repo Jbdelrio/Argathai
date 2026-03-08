@@ -25,10 +25,34 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 # ── App Setup ────────────────────────────────────────────────────────────
 app = dash.Dash(
     __name__,
-    external_stylesheets=[dbc.themes.CYBORG],  # Dark theme
+    external_stylesheets=[dbc.themes.CYBORG],
     title="Agarthai — Live Trading",
 )
 
+app.index_string = '''
+<!DOCTYPE html>
+<html>
+    <head>
+        {%metas%}
+        <title>{%title%}</title>
+        {%favicon%}
+        {%css%}
+        <style>
+            body { background: #000000 !important; }
+            .bg-dark { background: #000000 !important; }
+            .card, .alert { border-color: #2a2a2a !important; }
+        </style>
+    </head>
+    <body>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            {%renderer%}
+        </footer>
+    </body>
+</html>
+'''
 # ── Global Engine ────────────────────────────────────────────────────────
 try:
     from live.engine import LiveEngine
@@ -43,7 +67,6 @@ DEFAULT_COINS = {
     'Hyperliquid': ['BTC', 'ETH', 'SOL', 'DOGE', 'ARB', 'OP'],
     'Bitget Futures': ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'DOGEUSDT'],
 }
-
 
 def _strategy_controls_layout(strategy_names):
     rows = []
@@ -87,7 +110,6 @@ def _strategy_controls_layout(strategy_names):
             )
         )
     return rows
-
 # ── Layout ───────────────────────────────────────────────────────────────
 strategy_names = list(engine.get_strategy_names()) if engine else []
 
@@ -338,13 +360,30 @@ def refresh_dashboard(_):
     total_pnl = status.get('total_pnl', 0.0)
     active_count = sum(1 for v in runtime.values() if v.get('active'))
 
-    # PnL chart
-    pnl_data = engine.get_current_pnl() or [0]
-    fig_pnl = go.Figure(
-        data=[go.Scatter(y=np.cumsum(pnl_data) if len(pnl_data) > 1 else [0], mode='lines', fill='tozeroy', line=dict(color='#00e676', width=2))]
-    )
-    fig_pnl.update_layout(template='plotly_dark', height=350, title='Cumulative PnL ($)', margin=dict(l=40, r=20, t=40, b=30))
-
+    # # PnL chart
+    # pnl_data = engine.get_current_pnl() or [0]
+    # fig_pnl = go.Figure(
+    #     data=[go.Scatter(y=np.cumsum(pnl_data) if len(pnl_data) > 1 else [0], mode='lines', fill='tozeroy', line=dict(color='#00e676', width=2))]
+    # )
+    # fig_pnl.update_layout(template='plotly_dark', height=350, title='Cumulative PnL ($)', margin=dict(l=40, r=20, t=40, b=30))
+    # PnL / warmup chart
+    pnl_data = engine.get_current_pnl() or []
+    if pnl_data:
+        fig_pnl = go.Figure(
+            data=[go.Scatter(y=np.cumsum(pnl_data), mode='lines', fill='tozeroy', line=dict(color='#00e676', width=2))]
+        )
+        fig_pnl.update_layout(template='plotly_dark', height=350, title='Cumulative PnL ($)', margin=dict(l=40, r=20, t=40, b=30))
+    else:
+        names = list(strats.keys())
+        warmup_pct = []
+        for n in names:
+            rt = runtime.get(n, {})
+            req = max(1, int(rt.get('warmup_required_sec', 1)))
+            buf = int(rt.get('buffered_sec', 0))
+            warmup_pct.append(min(100, int((buf / req) * 100)))
+        fig_pnl = go.Figure(data=[go.Bar(x=names or ['No strategy'], y=warmup_pct or [0], marker_color='#2979ff')])
+        fig_pnl.update_layout(template='plotly_dark', height=350, title='Warmup progress by strategy (%)', yaxis=dict(range=[0, 100]), margin=dict(l=40, r=20, t=40, b=30))
+        fig_pnl.add_annotation(text='No executed trades yet: strategies warming up or waiting for signals.', xref='paper', yref='paper', x=0.5, y=1.08, showarrow=False, font=dict(color='#ffea00'))
     # Pie
     fig_pie = go.Figure(
         data=[

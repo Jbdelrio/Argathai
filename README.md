@@ -239,6 +239,22 @@ avec $c_{i,t}$ coût attendu (fees + spread + slippage proxy).
 - `config/exchanges.yaml`: paramètres exchange (fees/default market).
 - `config/settings.yaml`: capital/risk + chemins data portables.
 
+## Annexe — Explication des stratégies (intuition + formule + fonctionnement)
+
+### baudouin4
+- **Intuition** : après impulsion microstructurelle, le prix s'épuise puis revient.
+- **Formule clé** : $E_t^* = z_r(I_t)+z_r(C_t)+z_r(A_t)+z_r(-S_t)$.
+- **Fonctionnement** : machine d'état impulsion → stabilisation → entrée contrariante.
+
+### innocent3
+- **Intuition** : BTC/ETH reviennent vers leur relation cointegrée après déviation extrême.
+- **Formule clé** : $s_t = \log P_{ETH,t} - \beta_t\log P_{BTC,t}$, puis $z_t=(s_t-\mu_t)/(\sigma_t+\varepsilon)$.
+- **Fonctionnement** : entrée de réversion si z-score extrême + filtre OFI + demi-vie valide.
+
+### urbain2
+- **Intuition** : trader l'alpha idiosyncratique des alts après retrait des facteurs communs.
+- **Formule clé** : $r_{i,t}=\alpha_i+\beta_{i,B}r_t^{BTC}+\beta_{i,E}r_t^{ETH}+\sum_k\beta_{i,k}PC_{k,t}+u_{i,t}$, puis $|s^*_{i,t}|>\tau+\kappa c_{i,t}$.
+- **Fonctionnement** : score résiduel + confirmation OI + pénalité funding crowding + filtre liquidité/coûts/incertitude.
 ## Data portability
 Le loader ne hardcode pas de chemins machine.
 
