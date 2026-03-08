@@ -9,6 +9,7 @@ warmup progress, CSV export, positions monitor.
 
 import json
 import sys
+import dash
 from datetime import datetime
 from pathlib import Path
 import dash_bootstrap_components as dbc
