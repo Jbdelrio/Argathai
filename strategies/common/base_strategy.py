@@ -107,6 +107,13 @@ class BaseStrategy(ABC):
         self.capital_allocated = capital_usd
         self.logger.info(f"Capital allocated: ${capital_usd:.0f}")
 
+    def get_warmup_sec(self) -> int:
+        """Return warmup seconds required before strategy can trade.
+        Override in subclasses if warmup differs from params['warmup'].
+        Live engine reads live_warmup_sec first (faster paper-trading start).
+        """
+        return int(self.params.get('live_warmup_sec', self.params.get('warmup', 3600)))
+
     # ─── Abstract methods (MUST implement) ─────────────────────────────
 
     @abstractmethod

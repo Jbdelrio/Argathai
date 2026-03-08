@@ -1,4 +1,6 @@
 # Default params for baudouin4 (microstructure mean-reversion)
+# Effective live warmup: calib_lookback // 4 = 151200s (~42h) before quantiles stabilise.
+# warmup=3600 covers the mandatory w_l minimum; quantile NaN-guard in generate_signal handles the rest.
 warmup: 3600
 decision_step: 600
 cooldown_sec: 1800

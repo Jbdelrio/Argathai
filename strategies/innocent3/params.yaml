@@ -1,5 +1,6 @@
 # Default params for innocent3 (BTC-ETH stat arb)
-warmup: 604800
+warmup: 604800         # 7 days — full backtest validity (coint + OU estimation)
+live_warmup_sec: 86400 # 1 day — live/paper startup (min_periods = coint_window//4)
 decision_step: 600
 cooldown_sec: 1800
 coint_window: 604800

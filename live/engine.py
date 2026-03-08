@@ -32,7 +32,8 @@ class LiveEngine(BacktestEngine):
         # Per-strategy runtime state
         self.strategy_runtime: Dict[str, Dict] = {}
         for name, strat_data in self.strategies.items():
-            warmup = int(strat_data['instance'].params.get('warmup', 3600))
+            # Use get_warmup_sec() which prefers live_warmup_sec over warmup
+            warmup = strat_data['instance'].get_warmup_sec()
             self.strategy_runtime[name] = {
                 'active': False,
                 'warmup_required_sec': warmup,
