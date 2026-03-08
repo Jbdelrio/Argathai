@@ -27,6 +27,15 @@ class TestConfigFiles(unittest.TestCase):
         self.assertIn('history_fetch', data)
         self.assertIn('enabled', data['history_fetch'])
 
+    def test_settings_history_fetch_if_present_is_well_formed(self):
+        """Backward-compatible: history_fetch is optional in some user configs."""
+        p = Path('config/settings.yaml')
+        self.assertTrue(p.exists())
+        data = yaml.safe_load(p.read_text(encoding='utf-8')) or {}
+        hf = data.get('history_fetch')
+        if hf is not None:
+            self.assertIn('enabled', hf)
+
 
 if __name__ == '__main__':
     unittest.main()

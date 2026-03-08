@@ -1,5 +1,5 @@
 # Agarthai — Multi-Strategy Crypto Trading System
-Agarthai reste basé sur la même idée: **backtest + live trading** autour de stratégies modulaires (baudouin4 / innocent3/ urbain2), avec un focus execution/risk management.
+Agarthai garde la même vision : **backtest + live trading** avec des stratégies complémentaires (`baudouin4`, `innocent3`, `urbain2`) et une contrainte réaliste de coûts/exécution.
 
 ## Quick Start
 ```bash
@@ -18,6 +18,24 @@ run_live.bat
 ```
 
 > Note: `live/dashboard.py` (Dash) est conservé en legacy/debug, mais l'interface live officielle est maintenant `gui/live_app.py`.
+## Données réelles d’exchange (historique 1s)
+
+Tu peux continuer à utiliser tes gros fichiers locaux (`btc_1s.csv.gz`, `eth_1s.csv.gz`).
+
+Nouveau comportement dans `data/loader.py` :
+1. cherche d’abord local (`btc_path`/`eth_path`, `search_paths`, `data/binance_spot/`),
+2. **si absent**, peut lancer un auto-fetch historique depuis exchange (option `history_fetch.enabled=true` dans `config/settings.yaml`),
+3. le fetch est fait en mode **pagination + rate-limit** via `ccxt` et reconstruit des barres 1s depuis les trades.
+
+> Important : selon l’exchange, l’historique tick/trades est limité. Le système gère la pagination mais reste borné par les limites API réelles.
+
+### Fetch manuel d'historique 1s (exchange -> fichier)
+```bash
+python -m data.fetch_history --exchange bitget --symbol BTC/USDT:USDT \
+  --start 2026-02-01T00:00:00Z --end 2026-03-04T00:00:00Z \
+  --out data/binance_spot/btc_1s.csv.gz --limit 200
+
+Fais la même commande pour ETH en changeant `--symbol` et `--out`.
 
 ## Architecture actuelle (arborescence)
 ```text
@@ -70,9 +88,9 @@ Agarthai/
 ## Allocation active
 | Code | Type | Allocation cible | Rôle portefeuille |
 |------|------|------------------|-------------------|
-| `baudouin4` | Microstructure mean-reversion | 45% | Capter les excès d’impulsion à court terme |
+| `baudouin4` | Microstructure mean-reversion | 45% | Capter les excès d’impulsion à court terme, Fade impulsion après absorption |
 | `innocent3` | Stat-arb BTC/ETH | 35% | Exploiter la réversion du spread cointegré |
-| `urbain2` | Rotation résiduelle altcoins | 20% | Capter un alpha idiosyncratique, neutre au bêta crypto |
+| `urbain2` | Rotation résiduelle altcoins | 20% | Capter un alpha idiosyncratique, neutre au bêta crypto, Alpha idiosyncratique filtré coûts/régime |
 
 ---
 
