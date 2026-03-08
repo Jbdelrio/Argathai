@@ -2,9 +2,10 @@
 
 import os
 """Data loader — finds and loads CSV files."""
+from pathlib import Path
+from typing import Optional
 import numpy as np
 import pandas as pd
-from pathlib import Path
 import yaml
 SEARCH_DIRS = [
     Path('data/binance_spot'),
