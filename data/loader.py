@@ -97,9 +97,17 @@ def load_1s(symbol='btc'):
         if p.exists():
             df = pd.read_csv(p, compression='gzip')
             return prepare(df)
+
+    fallback_out = candidates[-1]
+    fetched = _maybe_fetch_from_exchange(symbol=symbol, out_path=fallback_out)
+    if fetched is not None:
+        return fetched
+
     raise FileNotFoundError(
-        f"{symbol.lower()}_1s.csv.gz not found. Checked: {[str(p) for p in candidates]}"
+        f"{symbol.lower()}_1s.csv.gz not found. Checked: {[str(p) for p in candidates]}. "
+        "You can enable auto-fetch in config/settings.yaml -> history_fetch."
     )
+
 def load_1s_data(symbol='btc'):
     """Backward-compatible alias used by the Streamlit backtest app."""
     return load_1s(symbol)
@@ -113,5 +121,6 @@ def prepare(df):
         df['log_price'] = np.log(df['last'])
     if not pd.api.types.is_datetime64_any_dtype(df['timestamp']):
         df['timestamp'] = pd.to_datetime(df['timestamp'])
+        df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True)
     df['ret_1s'] = df['ret_1s'].fillna(0)
     return df

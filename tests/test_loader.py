@@ -14,7 +14,8 @@ from data.loader import _candidate_paths, prepare
 class TestLoader(unittest.TestCase):
     def test_candidate_paths_include_local_default(self):
         paths = _candidate_paths('btc')
-        self.assertTrue(any(str(p).endswith('data/binance_spot/btc_1s.csv.gz') for p in paths))
+        expected_tail = Path('data') / 'binance_spot' / 'btc_1s.csv.gz'
+        self.assertTrue(any(Path(p).as_posix().endswith(expected_tail.as_posix()) for p in paths))
 
     def test_prepare_generates_required_columns(self):
         df = pd.DataFrame({
