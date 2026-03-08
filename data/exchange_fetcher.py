@@ -5,11 +5,20 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
 
+TimestampLike = Union[str, pd.Timestamp]
+
+
+def to_utc_timestamp(value: TimestampLike) -> pd.Timestamp:
+    """Return a timezone-aware UTC Timestamp from str/naive/aware inputs."""
+    ts = pd.Timestamp(value)
+    if ts.tzinfo is None:
+        return ts.tz_localize('UTC')
+    return ts.tz_convert('UTC')
 
 @dataclass
 class FetchConfig:
@@ -41,16 +50,18 @@ class ExchangeHistoricalFetcher:
     def fetch_trades_paginated(
         self,
         symbol: str,
-        start_ts: pd.Timestamp,
-        end_ts: pd.Timestamp,
+        start_ts: TimestampLike,
+        end_ts: TimestampLike,
         limit: Optional[int] = None,
     ) -> pd.DataFrame:
         """Fetch raw trades between [start_ts, end_ts] using paginated fetch_trades."""
         if limit is None:
             limit = self.config.max_limit
 
-        since = int(pd.Timestamp(start_ts, tz='UTC').timestamp() * 1000)
-        until = int(pd.Timestamp(end_ts, tz='UTC').timestamp() * 1000)
+        start_utc = to_utc_timestamp(start_ts)
+        end_utc = to_utc_timestamp(end_ts)
+        since = int(start_utc.timestamp() * 1000)
+        until = int(end_utc.timestamp() * 1000)
 
         all_rows = []
         while since < until:

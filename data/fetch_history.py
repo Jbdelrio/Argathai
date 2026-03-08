@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from data.exchange_fetcher import fetch_exchange_1s_to_file
+from data.exchange_fetcher import fetch_exchange_1s_to_file, to_utc_timestamp
 
 
 def main():
@@ -22,8 +22,8 @@ def main():
     df = fetch_exchange_1s_to_file(
         exchange=args.exchange,
         symbol=args.symbol,
-        start_ts=pd.Timestamp(args.start, tz='UTC'),
-        end_ts=pd.Timestamp(args.end, tz='UTC'),
+        start_ts=to_utc_timestamp(args.start),
+        end_ts=to_utc_timestamp(args.end),
         out_path=out,
         limit=args.limit,
     )

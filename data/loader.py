@@ -77,13 +77,13 @@ def _maybe_fetch_from_exchange(symbol: str, out_path: Path) -> Optional[pd.DataF
     market_symbol = market_map.get(symbol.lower(), symbol.upper() + 'USDT')
     limit = int(fetch_cfg.get('limit', 200))
 
-    from data.exchange_fetcher import fetch_exchange_1s_to_file
+    from data.exchange_fetcher import fetch_exchange_1s_to_file, to_utc_timestamp
 
     bars = fetch_exchange_1s_to_file(
         exchange=exchange,
         symbol=market_symbol,
-        start_ts=pd.Timestamp(start, tz='UTC'),
-        end_ts=pd.Timestamp(end, tz='UTC'),
+        start_ts=to_utc_timestamp(start),
+        end_ts=to_utc_timestamp(end),
         out_path=out_path,
         limit=limit,
     )
