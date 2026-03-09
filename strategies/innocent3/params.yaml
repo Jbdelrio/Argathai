@@ -1,0 +1,20 @@
+# Default params for innocent3 (BTC-ETH stat arb)
+#
+# Warmup live (avec pré-chargement CSV) : quasi-instantané
+#   target rows = live_coint_window + live_ou_win
+#               = 900 + 900 = 1800 rows (~30 min de données)
+#   → pré-chargés depuis CSV = warmup en quelques secondes
+#
+# Sans CSV : ~30 min d'accumulation live (au lieu de 2h précédemment)
+# Backtest: coint_window=604800 (7d), warmup=604800 — inchangé
+warmup: 604800         # 7 days — full backtest window (inchangé)
+live_warmup_sec: 1800  # gate generate_signal en live mode (900 + 900)
+live_coint_window: 900 # fenêtre beta rolling en live (réduite à 15 min)
+live_ou_win: 900       # fenêtre OU en live (15 min)
+decision_step: 600
+cooldown_sec: 1800
+coint_window: 604800
+entry_z: 2.0
+exit_z: 0.5
+tp_pct: 0.0075
+sl_pct: 0.0035

@@ -1,0 +1,18 @@
+# Default params for baudouin4 (microstructure mean-reversion)
+#
+# Warmup live (avec pré-chargement CSV) : quasi-instantané
+#   target rows = w_l + live_calib_lookback // 4
+#               = 1800 + 900 = 2700 rows (~45 min de données)
+#   → pré-chargés depuis CSV au démarrage = warmup en quelques secondes
+#
+# Sans CSV : ~45 min d'accumulation live (au lieu de 90 min précédemment)
+# Backtest: calib_lookback=604800 (7d) — inchangé
+warmup: 3600
+w_l: 1800                    # rolling window réduit en live (30 min vs 1h)
+live_calib_lookback: 3600    # fenêtre calibration live réduite (1h vs 2h)
+decision_step: 600
+cooldown_sec: 1800
+horizon_sec: 21600
+tp_pct: 0.0075
+sl_pct: 0.0035
+persist_k: 2

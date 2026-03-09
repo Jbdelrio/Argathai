@@ -1,0 +1,22 @@
+capital_usd: 1500.0
+leverage: 3
+risk_per_trade: 0.02
+max_position_pct: 0.30
+data:
+  btc_path: "data/binance_spot/btc_1s.csv.gz"
+  eth_path: "data/binance_spot/eth_1s.csv.gz"
+  # btc_path_local: 'C:\Users\jeanb\Documents\hyperstat-arb-bot\analysis_ops\data_binance\spot\btc_1s.csv.gz'
+  # eth_path_local: 'C:\Users\jeanb\Documents\hyperstat-arb-bot\analysis_ops\data_binance\spot\eth_1s.csv.gz'
+  # Optional extra data directories (portable, no hardcoded machine path)
+  search_paths: []
+  # Optional historical auto-fetch when local files are missing
+# Keep disabled if you already maintain local datasets.
+history_fetch:
+  enabled: false
+  exchange: bitget
+  start: "2026-02-01T00:00:00Z"
+  end: "2026-03-04T00:00:00Z"
+  limit: 200
+  symbols:
+    btc: BTC/USDT:USDT
+    eth: ETH/USDT:USDT

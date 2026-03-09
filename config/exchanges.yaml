@@ -1,0 +1,11 @@
+hyperliquid:
+  maker_fee: 0.0001
+  taker_fee: 0.00035
+  default_market: "BTC"
+  paper: true
+
+bitget_futures:
+  maker_fee: 0.0002
+  taker_fee: 0.0006
+  default_market: "BTCUSDT"
+  paper: true
