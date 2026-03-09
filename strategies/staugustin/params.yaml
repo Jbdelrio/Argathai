@@ -1,0 +1,76 @@
+# staugustin v1 — Liquidity Release Detection
+#
+# Architecture: 1s data → 1m aggregation → 5m decisions → 15-60min holds
+# Alpha: persistent aggressive flow transitioning from absorbed to impacting
+#
+# Warmup:
+#   Backtest: 21600s (6h) → 360 1m bars, z_window(288) fully populated
+#   Live: 7200s (2h) → 120 1m bars, z_window min_periods=72 OK
+#
+warmup: 21600
+live_warmup_sec: 7200
+decision_step: 300          # 5 minutes
+cooldown_sec: 900           # 15 minutes
+horizon_sec: 5400           # 90 minutes max holding
+
+# ── Aggregation ──────────────────────────────────────────────
+agg_interval: 60            # 1s → 1m bars
+
+# ── Feature windows (in 1m bars) ─────────────────────────────
+L_Q: 10                     # EMA span for volume normalization
+L_f: 5                      # EMA span for pressure smoothing
+H_pi: 5                     # Persistence lookback
+h_s: 5                      # Short realized-vol window
+h_l: 30                     # Long realized-vol window
+h_I: 5                      # Impact window
+L_I: 5                      # Impact EMA for acceleration
+h_E: 5                      # Efficiency window
+z_window: 288               # Robust z-score window (1 day of 1m bars)
+beta_ofi: 0.5               # OFI weight in pressure feature
+
+# ── Score weights ────────────────────────────────────────────
+w_pressure: 0.30
+w_impact: 0.20
+w_delta_impact: 0.20
+w_participation: 0.10
+w_efficiency: 0.10
+w_compression: 0.10
+w_illiquidity: 0.15
+
+# ── Entry thresholds ─────────────────────────────────────────
+theta_P: 1.0                # z(pressure)
+theta_pi: 0.70              # persistence (raw, 0-1)
+theta_C: 0.0                # compression (-z(vol_ratio))
+theta_I: 0.50               # z(impact)
+theta_dI: 0.50              # z(delta_impact)
+theta_A: 0.0                # z(participation)
+theta_E: 0.55               # efficiency (raw, 0-1)
+theta_M: 1.0                # z(illiquidity) ceiling
+tau: 1.75                   # score threshold (rule-based, no Ridge)
+
+# ── Exit parameters ──────────────────────────────────────────
+k_SL: 1.5                   # SL = k_SL * sigma_short
+k_TP: 2.5                   # TP = k_TP * sigma_short
+exit_efficiency: 0.35       # exit if E_t drops below
+exit_edge_ratio: 0.75       # exit if |S| < ratio * tau
+
+# ── Fallback TP/SL (used if sigma unavailable) ───────────────
+tp_pct: 0.0055
+sl_pct: 0.0033
+
+# ── Position sizing ──────────────────────────────────────────
+max_positions: 2
+min_notional: 250
+max_notional: 450
+max_weight: 0.30            # max 30% equity per position
+
+# ── Cost model ───────────────────────────────────────────────
+fee_side: 0.0001            # Hyperliquid maker
+lambda1: 0.15               # market-impact coefficient
+lambda2: 0.5                # illiquidity coefficient
+
+# ── Ridge prediction (v2, disabled for v1) ────────────────────
+use_ridge: false
+ridge_alpha: 1.0
+H_target: 20                # prediction horizon (minutes)
+gamma: 1.75                 # profitability barrier multiplier
