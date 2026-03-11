@@ -210,6 +210,37 @@ app.index_string = """
       .strat-pnl-card .spc-pnl  { font-size: 1.15rem; font-weight: 500; }
       .strat-pnl-card .spc-sub  { font-size: .65rem; color: #555; margin-top: 2px; }
 
+      /* ── Warmup spinner ────────────────────────────────── */
+      @keyframes spin {
+        0%   { transform: rotate(0deg);   }
+        100% { transform: rotate(360deg); }
+      }
+      .warmup-spinner {
+        display: inline-block;
+        width: 12px; height: 12px;
+        border: 2px solid #2a9fd640;
+        border-top: 2px solid #2a9fd6;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        vertical-align: middle;
+        margin-right: 6px;
+      }
+      .warmup-spinner-done {
+        display: inline-block;
+        width: 12px; height: 12px;
+        border: 2px solid #77b300;
+        border-radius: 50%;
+        vertical-align: middle;
+        margin-right: 6px;
+        background: #77b300;
+      }
+      .min-data-tag {
+        display: inline-block; background: #1a2530;
+        color: #2a9fd680; border-radius: 3px;
+        padding: 1px 6px; font-size: .55rem;
+        margin-left: 6px; letter-spacing: .03em;
+      }
+
       /* ── Misc ───────────────────────────────────────────── */
       .text-price { font-size: 1.05rem; color: #2a9fd6; }
       .text-muted  { color: #555 !important; font-size: .7rem; }
@@ -237,15 +268,24 @@ except Exception as e:
     print(f"[dashboard] Warning: LiveEngine not available — {e}")
 
 STRATEGY_META = {
-    "baudouin4": {"label": "Baudouin 4",     "type": "Mean-Rev",      "turnover": "Moyen"},
-    "innocent3": {"label": "Innocent 3",     "type": "Stat-Arb",      "turnover": "Faible"},
-    "urbain2":   {"label": "Urbain 2",       "type": "Res. Momentum", "turnover": "Faible"},
+    "baudouin4":   {"label": "Baudouin 4",   "type": "Mean-Rev",       "turnover": "Moyen",
+                    "min_data": "30min calib + lookback",  "min_data_sec": 2700},
+    "innocent3":   {"label": "Innocent 3",   "type": "Stat-Arb",       "turnover": "Faible",
+                    "min_data": "30min coint + OU window", "min_data_sec": 1800},
+    "urbain2":     {"label": "Urbain 2",     "type": "Res. Momentum",  "turnover": "Faible",
+                    "min_data": "30min regime window",     "min_data_sec": 1800},
+    "staugustin":  {"label": "Staugustin",   "type": "Liq. Release",   "turnover": "Moyen",
+                    "min_data": "5h18 (318 bars x 60s)",   "min_data_sec": 19080},
+    "childeric1":  {"label": "Childeric 1",  "type": "Resid. Fade",    "turnover": "Moyen",
+                    "min_data": "1h (MAD z-score window)",  "min_data_sec": 3600},
 }
 
 STRAT_COLORS = {
-    "baudouin4": "#2a9fd6",
-    "innocent3": "#77b300",
-    "urbain2":   "#ff7518",
+    "baudouin4":  "#2a9fd6",
+    "innocent3":  "#77b300",
+    "urbain2":    "#ff7518",
+    "staugustin": "#d500f9",
+    "childeric1": "#e91e63",
 }
 
 EXCHANGES = ["Hyperliquid", "Bitget Futures"]
@@ -253,7 +293,13 @@ DEFAULT_COINS = {
     "Hyperliquid": ["BTC", "ETH", "SOL", "DOGE", "ARB", "OP", "AVAX", "LINK"],
     "Bitget Futures": ["BTCUSDT", "ETHUSDT", "SOLUSDT", "DOGEUSDT"],
 }
-TIMEFRAMES = ["1s", "5s", "15s", "30s", "1m", "5m"]
+TIMEFRAMES = ["1s", "5s", "10s", "15s", "30s", "1m", "5m", "10m"]
+
+# Map timeframe label → seconds
+_TF_TO_SEC = {
+    "1s": 1, "5s": 5, "10s": 10, "15s": 15, "30s": 30,
+    "1m": 60, "5m": 300, "10m": 600,
+}
 
 strategy_names = list(engine.get_strategy_names()) if engine else []
 
@@ -359,6 +405,8 @@ def _build_live_metrics_bar(rt: dict) -> list:
     state   = rt.get('state', 'IDLE')
     signals = rt.get('n_signals_today', 0)
     unreal  = rt.get('unrealized_pnl', 0.0)
+    n_scans = rt.get('n_scans', 0)
+    last_scan = rt.get('last_scan_at', '—')
 
     price_str  = f"${price:,.2f}" if price else "—"
     unreal_str = f"${unreal:+.2f}" if unreal != 0 else "$0.00"
@@ -375,6 +423,9 @@ def _build_live_metrics_bar(rt: dict) -> list:
                  className="lm-item"),
         html.Div([html.Span("ÉTAT",       className="lm-key"),
                   html.Span(state,        className=f"lm-val {state_cls}")],
+                 className="lm-item"),
+        html.Div([html.Span("SCANS",      className="lm-key"),
+                  html.Span(f"{n_scans} @ {last_scan}", className="lm-val")],
                  className="lm-item"),
         html.Div([html.Span("SIGNAUX",    className="lm-key"),
                   html.Span(str(signals), className="lm-val")],
@@ -554,6 +605,7 @@ def _tab_marche():
     rows = [header]
     for i, name in enumerate(strategy_names, 1):
         meta = STRATEGY_META.get(name, {})
+        min_data_label = meta.get("min_data", "")
         rows.append(html.Div([
             # Main strategy row
             html.Div([
@@ -562,7 +614,11 @@ def _tab_marche():
                 html.Div(meta.get("type", "—"),       className="col-type"),
                 html.Div(meta.get("turnover", "—"),   className="col-turnover"),
                 html.Div([
-                    html.Div("0% — en attente", style={"fontSize": ".7rem", "color": "#555"},
+                    html.Div([
+                        "0% — en attente",
+                        html.Span(f"min: {min_data_label}", className="min-data-tag")
+                        if min_data_label else None,
+                    ], style={"fontSize": ".7rem", "color": "#555"},
                              id={"type": "warmup-label", "index": name}),
                     _warmup_bar(0),
                 ], className="col-warmup", id={"type": "warmup-cell", "index": name}),
@@ -583,23 +639,12 @@ def _tab_marche():
                     id={"type": "risk-metrics-div", "index": name},
                     className="risk-metrics-row",
                 ),
-                # Charts : PnL equity (gauche) + Prix live (droite)
-                dbc.Row([
-                    dbc.Col(
-                        dcc.Graph(
-                            id={"type": "strat-pnl-chart", "index": name},
-                            config={"displayModeBar": False},
-                            figure=_empty_dark_fig(180, "P&L cumulatif ($)"),
-                        ), width=6,
-                    ),
-                    dbc.Col(
-                        dcc.Graph(
-                            id={"type": "strat-price-chart", "index": name},
-                            config={"displayModeBar": False},
-                            figure=_empty_dark_fig(180, "Prix live"),
-                        ), width=6,
-                    ),
-                ], style={"margin": "0"}),
+                # Chart : PnL equity (pleine largeur)
+                dcc.Graph(
+                    id={"type": "strat-pnl-chart", "index": name},
+                    config={"displayModeBar": False},
+                    figure=_empty_dark_fig(220, "P&L cumulatif ($)"),
+                ),
             ],
                 id={"type": "live-section", "index": name},
                 className="strat-live-section",
@@ -857,23 +902,38 @@ def update_coins(exchange):
     Input("stop-btn",       "n_clicks"),
     Input("emergency-btn",  "n_clicks"),
     State("exchange-select", "value"),
+    State("tf-select",       "value"),
+    State("coin-select",     "value"),
     State("conn-store",      "data"),
     prevent_initial_call=True,
 )
-def handle_controls(conn, disc, start, stop, emerg, exchange, store):
+def handle_controls(conn, disc, start, stop, emerg, exchange, tf_val, coin_sel, store):
     btn = ctx.triggered_id
     store = store or {}
 
     if engine is None:
         return "Engine non chargé — vérifier les logs.", "danger", store
 
+    # Determine primary coin from dropdown selection
+    primary_coin = "BTC"
+    if isinstance(coin_sel, list) and coin_sel:
+        primary_coin = coin_sel[0]
+    elif isinstance(coin_sel, str) and coin_sel:
+        primary_coin = coin_sel
+
     if btn == "connect-btn":
         ex_key = exchange.lower().replace(" ", "_").replace("_futures", "")
+        # Apply tick interval from timeframe dropdown
+        tick_sec = _TF_TO_SEC.get(tf_val, 1)
         ok = engine.connect(ex_key, paper=True)
         if ok:
+            engine.tick_interval_sec = tick_sec
             store["connected"] = True
             store["exchange"] = exchange
-            return f"Connecté à {exchange} (paper mode)", "success", store
+            store["tick_interval"] = tick_sec
+            store["coin"] = primary_coin
+            return (f"Connecté à {exchange} (paper) — tick {tf_val} — coin {primary_coin}",
+                    "success", store)
         return "Connexion échouée.", "danger", store
 
     if btn == "disconnect-btn":
@@ -882,8 +942,9 @@ def handle_controls(conn, disc, start, stop, emerg, exchange, store):
         return "Déconnecté.", "secondary", store
 
     if btn == "start-btn":
-        if engine.start():
-            return "Toutes les stratégies démarrées.", "success", store
+        if engine.start(coin=primary_coin):
+            coins_str = ", ".join(coin_sel) if isinstance(coin_sel, list) else primary_coin
+            return f"Toutes les stratégies démarrées sur {coins_str}.", "success", store
         return "Impossible de démarrer — connecter d'abord.", "warning", store
 
     if btn == "stop-btn":
@@ -902,9 +963,10 @@ def handle_controls(conn, disc, start, stop, emerg, exchange, store):
     Output("status-alert", "color",    allow_duplicate=True),
     Input({"type": "start-strat-btn", "index": dash.ALL}, "n_clicks"),
     Input({"type": "stop-strat-btn",  "index": dash.ALL}, "n_clicks"),
+    State("coin-select", "value"),
     prevent_initial_call=True,
 )
-def handle_per_strategy(starts, stops):
+def handle_per_strategy(starts, stops, coin_sel):
     if engine is None:
         return "Engine non chargé.", "danger"
     trig = ctx.triggered_id
@@ -912,9 +974,17 @@ def handle_per_strategy(starts, stops):
         return dash.no_update, dash.no_update
     name   = trig.get("index")
     action = trig.get("type")
+
+    # Determine coin from dropdown
+    primary_coin = "BTC"
+    if isinstance(coin_sel, list) and coin_sel:
+        primary_coin = coin_sel[0]
+    elif isinstance(coin_sel, str) and coin_sel:
+        primary_coin = coin_sel
+
     if action == "start-strat-btn":
-        ok = engine.start_strategy(name)
-        return (f"Stratégie démarrée : {name}", "success") if ok else (f"Impossible de démarrer {name}", "warning")
+        ok = engine.start_strategy(name, coin=primary_coin)
+        return (f"Stratégie démarrée : {name} sur {primary_coin}", "success") if ok else (f"Impossible de démarrer {name}", "warning")
     if action == "stop-strat-btn":
         ok = engine.stop_strategy(name)
         return (f"Stratégie arrêtée : {name}", "warning") if ok else (f"Impossible d'arrêter {name}", "danger")
@@ -952,7 +1022,6 @@ def handle_per_strategy(starts, stops):
     Output({"type": "live-section",      "index": dash.ALL}, "style"),
     Output({"type": "risk-metrics-div",  "index": dash.ALL}, "children"),
     Output({"type": "strat-pnl-chart",   "index": dash.ALL}, "figure"),
-    Output({"type": "strat-price-chart", "index": dash.ALL}, "figure"),
     Input("refresh-interval",     "n_intervals"),
     State("conn-store",           "data"),
     State("coin-select",          "value"),
@@ -985,11 +1054,10 @@ def refresh(_, store, coins, capital_input):
     global_status  = "IDLE"
     global_mode    = "paper"
     n_active       = 0
-    # Listes pour les 4 nouveaux Outputs de la section live
+    # Listes pour les 3 Outputs de la section live
     live_section_styles   = [{"display": "none"}] * n_strats
     risk_metrics_contents = [html.Div()] * n_strats
-    pnl_chart_figs        = [_empty_dark_fig(180, "P&L cumulatif ($)")] * n_strats
-    price_chart_figs      = [_empty_dark_fig(180, "Prix live")] * n_strats
+    pnl_chart_figs        = [_empty_dark_fig(220, "P&L cumulatif ($)")] * n_strats
     portfolio_metrics = _metric_cards([
         ("Capital",        f"${capital:,.0f}",  ""),
         ("Réalisé PnL",    "$0.00",              ""),
@@ -1026,6 +1094,7 @@ def refresh(_, store, coins, capital_input):
                 # ── Barre verte "WARMUP COMPLET" ────────────────────────
                 warmup_labels[i] = html.Div([
                     html.Span([
+                        html.Span(className="warmup-spinner-done"),
                         "WARMUP COMPLET",
                         html.Span("✓ LIVE", className="warmup-done-badge"),
                         html.Span(
@@ -1097,72 +1166,32 @@ def refresh(_, store, coins, capital_input):
                     )
                     pnl_chart_figs[i] = fig_p
 
-                    # Prix live chart
-                    ph_n = engine.get_price_history(name)
-                    if ph_n:
-                        ts_n = [h["ts"] for h in ph_n]
-                        px_n = [h["price"] for h in ph_n]
-                        price_traces_n = [go.Scatter(
-                            x=ts_n, y=px_n, mode="lines",
-                            line=dict(color="#2a9fd6", width=1),
-                            fill="tozeroy",
-                            fillcolor="rgba(42,159,214,0.05)",
-                        )]
-                        # Lignes TP/SL si position ouverte
-                        pos_n = engine.current_positions.get(name)
-                        if pos_n and px_n:
-                            ep_n = pos_n.get("exec_price", px_n[-1])
-                            tp_n = pos_n.get("tp_price")
-                            sl_n = pos_n.get("sl_price")
-                            t_span = [ts_n[0], ts_n[-1]]
-                            if ep_n:
-                                price_traces_n.append(go.Scatter(
-                                    x=t_span, y=[ep_n, ep_n], mode="lines",
-                                    line=dict(color="#ffea00", width=1, dash="dash"),
-                                    name="Entry",
-                                ))
-                            if tp_n:
-                                price_traces_n.append(go.Scatter(
-                                    x=t_span, y=[tp_n, tp_n], mode="lines",
-                                    line=dict(color="#77b300", width=1, dash="dot"),
-                                    name="TP",
-                                ))
-                            if sl_n:
-                                price_traces_n.append(go.Scatter(
-                                    x=t_span, y=[sl_n, sl_n], mode="lines",
-                                    line=dict(color="#cc0000", width=1, dash="dot"),
-                                    name="SL",
-                                ))
-                        fig_px = go.Figure(data=price_traces_n)
-                    else:
-                        fig_px = _empty_dark_fig(180, "Prix live")
-                    fig_px.update_layout(
-                        template="plotly_dark", height=180,
-                        paper_bgcolor="#0c1014", plot_bgcolor="#0c1014",
-                        margin=dict(l=70, r=10, t=28, b=25),
-                        font=dict(family="Roboto Mono, Courier New", color="#555", size=9),
-                        xaxis=dict(gridcolor="#1a2530", title=""),
-                        yaxis=dict(gridcolor="#1a2530", tickformat="$,.0f",
-                                   title=dict(text="Prix $", font=dict(size=8))),
-                        title=dict(
-                            text=f"Prix live — {name.upper()}",
-                            font=dict(size=10, color="#2a9fd6"), x=0,
-                        ),
-                        showlegend=False,
-                    )
-                    price_chart_figs[i] = fig_px
-
             else:
                 # ── Barre de progression normale ─────────────────────────
-                h_buf = buf // 3600; m_buf = (buf % 3600) // 60
-                h_req = req // 3600; m_req = (req % 3600) // 60
-                warmup_labels[i] = html.Div([
-                    html.Span(
-                        f"{h_buf:02d}h{m_buf:02d}m / {h_req:02d}h{m_req:02d}m  ({pct}%)",
-                        style={"fontSize": ".7rem", "color": "#888"}
-                    ),
-                    _warmup_bar(pct),
-                ])
+                is_active = rt.get("active", False)
+                meta_i = STRATEGY_META.get(name, {})
+                min_data_label = meta_i.get("min_data", "")
+                if is_active and pct < 100:
+                    # Spinner animé pendant le warmup actif
+                    warmup_labels[i] = html.Div([
+                        html.Span([
+                            html.Span(className="warmup-spinner"),
+                            f"Chargement… {pct}%",
+                            html.Span(f" — {buf:,} / {req:,} rows",
+                                      style={"fontSize": ".63rem", "color": "#555",
+                                             "marginLeft": "6px"}),
+                        ], style={"fontSize": ".7rem", "color": "#2a9fd6"}),
+                        _warmup_bar(pct),
+                    ])
+                else:
+                    warmup_labels[i] = html.Div([
+                        html.Span([
+                            f"0% — en attente",
+                            html.Span(f"min: {min_data_label}", className="min-data-tag")
+                            if min_data_label else None,
+                        ], style={"fontSize": ".7rem", "color": "#555"}),
+                        _warmup_bar(pct),
+                    ])
 
             status_pills[i] = _pill(rt.get("active", False))
 
@@ -1296,7 +1325,7 @@ def refresh(_, store, coins, capital_input):
             labels=pie_names or ["—"],
             values=cap_vals or [1],
             hole=0.45,
-            marker_colors=["#2a9fd6", "#77b300", "#ff7518", "#d500f9"],
+            marker_colors=[STRAT_COLORS.get(n, "#aaa") for n in strats.keys()],
             textfont=dict(size=10),
         )])
         fig_pie.update_layout(
@@ -1389,7 +1418,6 @@ def refresh(_, store, coins, capital_input):
         live_section_styles,
         risk_metrics_contents,
         pnl_chart_figs,
-        price_chart_figs,
     )
 
 

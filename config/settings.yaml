@@ -2,15 +2,37 @@ capital_usd: 1500.0
 leverage: 3
 risk_per_trade: 0.02
 max_position_pct: 0.30
+
+# ── Bootstrap live ────────────────────────────────────────────────────
+# Au démarrage du live engine, télécharge des candles 1m depuis l'exchange
+# (Hyperliquid ou Bitget) pour un warmup rapide sans fichiers CSV.
+bootstrap:
+  enabled: true
+  minutes_back: 360        # 6h de données → ~21600 rows synthétiques
+                           # (staugustin a besoin de ≥318 bars 1m = ~5h20)
+
+# ── Tick interval ─────────────────────────────────────────────────────
+# Intervalle entre chaque tick live (secondes). Aussi adapte le bootstrap.
+# Valeurs typiques : 1 (défaut), 5, 10, 15, 30, 60, 300, 600
+tick_interval_sec: 1
+
+# ── Mode d'exécution ──────────────────────────────────────────────────
+# market : ordre immédiat (slippage Almgren-Chriss en paper)
+# vwap   : accumule ticks pendant vwap_duration_sec, exécute au VWAP
+# twap   : découpe en twap_slices tranches sur twap_duration_sec
+execution:
+  mode: "market"
+  vwap_duration_sec: 60
+  twap_duration_sec: 120
+  twap_slices: 5
+
+# ── Données (legacy CSV — non utilisé en live bootstrap) ─────────────
 data:
   btc_path: "data/binance_spot/btc_1s.csv.gz"
   eth_path: "data/binance_spot/eth_1s.csv.gz"
-  # btc_path_local: 'C:\Users\jeanb\Documents\hyperstat-arb-bot\analysis_ops\data_binance\spot\btc_1s.csv.gz'
-  # eth_path_local: 'C:\Users\jeanb\Documents\hyperstat-arb-bot\analysis_ops\data_binance\spot\eth_1s.csv.gz'
-  # Optional extra data directories (portable, no hardcoded machine path)
   search_paths: []
-  # Optional historical auto-fetch when local files are missing
-# Keep disabled if you already maintain local datasets.
+
+# ── Historical fetch (optionnel, pour backtest uniquement) ────────────
 history_fetch:
   enabled: false
   exchange: bitget

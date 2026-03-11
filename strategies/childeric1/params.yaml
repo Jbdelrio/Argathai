@@ -1,0 +1,62 @@
+# Default params for childeric1
+#
+# Childeric1 = residual / dislocation fade sur altcoins
+# Logique :
+# 1) détecter une extension anormale (alpha_raw / z_resid)
+# 2) attendre une stabilisation / mini-retournement
+# 3) entrer en fade avec TP/SL adaptatifs
+#
+# Pensé pour du live en granularité rapide (~1s) avec un warmup raisonnable.
+# Sur un flux déjà préchargé depuis CSV, l'initialisation est quasi immédiate.
+# Sans préchargement, laisser tourner un peu avant de trader.
+
+# -------------------------------------------------------------------
+# Warmup / calibration live
+# -------------------------------------------------------------------
+warmup: 3600                 # ~1h si 1 ligne = 1s
+live_warmup_sec: 1800        # warmup live minimal toléré
+cooldown_sec: 600            # 10 min entre deux signaux
+max_hold_sec: 900            # on ne garde pas plus de 15 min
+
+# -------------------------------------------------------------------
+# Fenêtres de features
+# -------------------------------------------------------------------
+w_fast: 30                   # mouvement court
+w_mid: 120                   # mouvement intermédiaire
+w_slow: 900                  # contexte lent / régime
+w_vol: 300                   # vol rolling
+w_mad: 1800                  # normalisation robuste (z-score MAD)
+w_flow: 60                   # OFI / flow court
+w_activity: 300              # intensité de marché
+beta_win: 600                # fenêtre de beta vs facteur marché
+
+# -------------------------------------------------------------------
+# Détection / entrée
+# -------------------------------------------------------------------
+entry_z: 2.2                 # seuil d'extension pour armer le signal
+rearm_z: 1.0                 # reset si retour trop rapide vers la moyenne
+confirm_ret_z: 0.35          # confirmation par retournement du micro-momentum
+confirm_flow_flip: true      # demande que le flow ne pousse plus dans le sens du choc
+min_activity_z: -0.5         # évite les phases trop mortes
+beta_clip: 5.0               # limite du beta marché pour éviter les extrêmes
+
+# -------------------------------------------------------------------
+# Filtres de régime / coûts
+# -------------------------------------------------------------------
+max_vol_ratio: 2.5           # coupe si la vol fast explose vs vol slow
+max_spread_bps: 20.0         # pas de trade si spread trop cher
+max_abs_funding: 0.0020      # filtre funding extrême
+max_abs_oi_z: 3.0            # filtre variation d'open interest extrême
+
+# -------------------------------------------------------------------
+# Gestion du risque / sorties
+# TP/SL adaptatifs bornés en pourcentage
+# -------------------------------------------------------------------
+tp_sigma: 1.40
+sl_sigma: 0.90
+
+tp_pct_min: 0.0025           # 0.25%
+sl_pct_min: 0.0018           # 0.18%
+
+tp_pct_max: 0.0100           # 1.00%
+sl_pct_max: 0.0075           # 0.75%
