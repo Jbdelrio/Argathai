@@ -1,0 +1,48 @@
+{
+  "validation_date": "2026-04-19T02:17:15.904654",
+  "strategies": {
+    "s1_funding_arb": {
+      "passes": true,
+      "params": {
+        "min_funding_annual_pct": 15.0,
+        "exit_funding_annual_pct": 5.0,
+        "max_hold_hours": 8,
+        "stop_loss_pct": 0.005,
+        "hedge_corr_min": 0.7,
+        "position_pct": 0.15,
+        "funding_ewma_alpha": 0.1
+      },
+      "oos_metrics": {
+        "n_trades": 22,
+        "total_return_pct": 5.229,
+        "sharpe": 6.179,
+        "sortino": 99.254,
+        "calmar": 99.052,
+        "max_dd_pct": 0.879,
+        "profit_factor": 4.39,
+        "win_rate": 45.45,
+        "avg_win_loss": 5.268,
+        "trades_per_day": 1.47,
+        "final_equity": 526.14,
+        "avg_trade_pnl": 1.1884,
+        "min_fold_sharpe": 0.0,
+        "fold_sharpes": [
+          8.179,
+          6.977,
+          0.0
+        ],
+        "mc_p5_sharpe": 2.243
+      },
+      "mc": {
+        "p5": 2.243,
+        "p25": 5.253,
+        "p50": 6.695,
+        "p75": 8.055,
+        "p95": 10.325,
+        "mean": 6.528,
+        "std": 2.701
+      },
+      "failures": []
+    }
+  }
+}

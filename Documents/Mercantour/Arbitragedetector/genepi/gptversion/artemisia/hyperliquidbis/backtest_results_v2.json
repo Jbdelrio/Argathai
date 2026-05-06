@@ -1,0 +1,1367 @@
+{
+  "generated_at": "2026-04-17T02:02:45.564967+00:00",
+  "data": {
+    "symbols": [
+      "SOL",
+      "LTC",
+      "AVAX",
+      "ARB",
+      "DOGE",
+      "ETH",
+      "BTC",
+      "BNB",
+      "SUI",
+      "XRP",
+      "kPEPE",
+      "LDO",
+      "CRV",
+      "BCH",
+      "LINK",
+      "APT",
+      "AAVE",
+      "WLD",
+      "ZRO",
+      "DOT",
+      "UNI",
+      "TIA",
+      "BLUR",
+      "ADA",
+      "NEAR",
+      "TON",
+      "ORDI",
+      "PENDLE",
+      "kBONK",
+      "ONDO",
+      "WIF",
+      "TAO",
+      "AR",
+      "ENA",
+      "kNEIRO",
+      "PNUT",
+      "HYPE",
+      "VIRTUAL",
+      "PENGU",
+      "FARTCOIN",
+      "ZEREBRO",
+      "MORPHO",
+      "BIO",
+      "SPX",
+      "TRUMP",
+      "VVV",
+      "TST",
+      "IP",
+      "PAXG",
+      "PUMP",
+      "XPL",
+      "WLFI",
+      "ASTER",
+      "ZEC",
+      "MON",
+      "LIT"
+    ],
+    "n_days": 2.8
+  },
+  "validation_criteria": {
+    "sharpe": 1.0,
+    "win_rate": 52.0,
+    "profit_factor": 1.15,
+    "max_dd_pct": 10.0,
+    "trades_per_day": 3.0,
+    "edge_bps": 2.0
+  },
+  "strategies": {
+    "SPIKE_REV": {
+      "top10": [
+        {
+          "params": {
+            "spike_lookback": 3,
+            "spike_threshold": 4.0,
+            "reversion_target": 0.6,
+            "stop_mult": 2.0,
+            "max_hold_candles": 20,
+            "atr_period": 14
+          },
+          "metrics": {
+            "trades": 1512,
+            "wins": 873,
+            "win_rate": 57.7,
+            "total_pnl": 63.05,
+            "total_pnl_pct": 12.61,
+            "profit_factor": 1.383,
+            "expectancy": 0.0417,
+            "sharpe": 16.537,
+            "max_dd_pct": 2.96,
+            "trades_per_day": 539.2,
+            "avg_edge_bps": 16.7
+          },
+          "score": 16.537,
+          "valid": true
+        },
+        {
+          "params": {
+            "spike_lookback": 3,
+            "spike_threshold": 4.0,
+            "reversion_target": 0.3,
+            "stop_mult": 1.0,
+            "max_hold_candles": 10,
+            "atr_period": 14
+          },
+          "metrics": {
+            "trades": 3315,
+            "wins": 1909,
+            "win_rate": 57.6,
+            "total_pnl": 62.09,
+            "total_pnl_pct": 12.42,
+            "profit_factor": 1.345,
+            "expectancy": 0.0187,
+            "sharpe": 13.072,
+            "max_dd_pct": 5.88,
+            "trades_per_day": 1182.2,
+            "avg_edge_bps": 7.5
+          },
+          "score": 13.072,
+          "valid": true
+        },
+        {
+          "params": {
+            "spike_lookback": 3,
+            "spike_threshold": 3.5,
+            "reversion_target": 0.4,
+            "stop_mult": 2.0,
+            "max_hold_candles": 15,
+            "atr_period": 20
+          },
+          "metrics": {
+            "trades": 2289,
+            "wins": 1411,
+            "win_rate": 61.6,
+            "total_pnl": 28.3,
+            "total_pnl_pct": 5.66,
+            "profit_factor": 1.225,
+            "expectancy": 0.0124,
+            "sharpe": 12.12,
+            "max_dd_pct": 4.29,
+            "trades_per_day": 816.3,
+            "avg_edge_bps": 4.9
+          },
+          "score": 12.12,
+          "valid": true
+        },
+        {
+          "params": {
+            "spike_lookback": 3,
+            "spike_threshold": 4.0,
+            "reversion_target": 0.6,
+            "stop_mult": 1.5,
+            "max_hold_candles": 20,
+            "atr_period": 10
+          },
+          "metrics": {
+            "trades": 1608,
+            "wins": 903,
+            "win_rate": 56.2,
+            "total_pnl": 82.53,
+            "total_pnl_pct": 16.51,
+            "profit_factor": 1.434,
+            "expectancy": 0.0513,
+            "sharpe": 11.348,
+            "max_dd_pct": 8.84,
+            "trades_per_day": 573.4,
+            "avg_edge_bps": 20.5
+          },
+          "score": 11.348,
+          "valid": true
+        },
+        {
+          "params": {
+            "spike_lookback": 3,
+            "spike_threshold": 3.5,
+            "reversion_target": 0.4,
+            "stop_mult": 1.5,
+            "max_hold_candles": 15,
+            "atr_period": 20
+          },
+          "metrics": {
+            "trades": 2405,
+            "wins": 1456,
+            "win_rate": 60.5,
+            "total_pnl": 58.03,
+            "total_pnl_pct": 11.61,
+            "profit_factor": 1.405,
+            "expectancy": 0.0241,
+            "sharpe": 10.506,
+            "max_dd_pct": 5.84,
+            "trades_per_day": 857.7,
+            "avg_edge_bps": 9.7
+          },
+          "score": 10.506,
+          "valid": true
+        },
+        {
+          "params": {
+            "spike_lookback": 3,
+            "spike_threshold": 4.0,
+            "reversion_target": 0.3,
+            "stop_mult": 1.5,
+            "max_hold_candles": 10,
+            "atr_period": 14
+          },
+          "metrics": {
+            "trades": 3115,
+            "wins": 1821,
+            "win_rate": 58.5,
+            "total_pnl": 43.72,
+            "total_pnl_pct": 8.74,
+            "profit_factor": 1.238,
+            "expectancy": 0.014,
+            "sharpe": 10.443,
+            "max_dd_pct": 4.64,
+            "trades_per_day": 1110.8,
+            "avg_edge_bps": 5.6
+          },
+          "score": 10.443,
+          "valid": true
+        },
+        {
+          "params": {
+            "spike_lookback": 3,
+            "spike_threshold": 4.0,
+            "reversion_target": 0.5,
+            "stop_mult": 1.0,
+            "max_hold_candles": 20,
+            "atr_period": 14
+          },
+          "metrics": {
+            "trades": 1966,
+            "wins": 1127,
+            "win_rate": 57.3,
+            "total_pnl": 22.68,
+            "total_pnl_pct": 4.54,
+            "profit_factor": 1.129,
+            "expectancy": 0.0115,
+            "sharpe": 9.437,
+            "max_dd_pct": 4.76,
+            "trades_per_day": 701.1,
+            "avg_edge_bps": 4.6
+          },
+          "score": 9.437,
+          "valid": false
+        },
+        {
+          "params": {
+            "spike_lookback": 3,
+            "spike_threshold": 4.0,
+            "reversion_target": 0.6,
+            "stop_mult": 1.5,
+            "max_hold_candles": 20,
+            "atr_period": 14
+          },
+          "metrics": {
+            "trades": 1593,
+            "wins": 914,
+            "win_rate": 57.4,
+            "total_pnl": 23.27,
+            "total_pnl_pct": 4.65,
+            "profit_factor": 1.132,
+            "expectancy": 0.0146,
+            "sharpe": 9.37,
+            "max_dd_pct": 4.65,
+            "trades_per_day": 568.1,
+            "avg_edge_bps": 5.8
+          },
+          "score": 9.37,
+          "valid": false
+        },
+        {
+          "params": {
+            "spike_lookback": 3,
+            "spike_threshold": 3.5,
+            "reversion_target": 0.4,
+            "stop_mult": 2.0,
+            "max_hold_candles": 20,
+            "atr_period": 10
+          },
+          "metrics": {
+            "trades": 1988,
+            "wins": 1288,
+            "win_rate": 64.8,
+            "total_pnl": 29.92,
+            "total_pnl_pct": 5.98,
+            "profit_factor": 1.237,
+            "expectancy": 0.0151,
+            "sharpe": 9.292,
+            "max_dd_pct": 3.15,
+            "trades_per_day": 708.9,
+            "avg_edge_bps": 6.0
+          },
+          "score": 9.292,
+          "valid": true
+        },
+        {
+          "params": {
+            "spike_lookback": 3,
+            "spike_threshold": 4.0,
+            "reversion_target": 0.3,
+            "stop_mult": 2.0,
+            "max_hold_candles": 10,
+            "atr_period": 14
+          },
+          "metrics": {
+            "trades": 3010,
+            "wins": 1771,
+            "win_rate": 58.8,
+            "total_pnl": 38.08,
+            "total_pnl_pct": 7.62,
+            "profit_factor": 1.217,
+            "expectancy": 0.0126,
+            "sharpe": 9.144,
+            "max_dd_pct": 6.41,
+            "trades_per_day": 1073.4,
+            "avg_edge_bps": 5.1
+          },
+          "score": 9.144,
+          "valid": true
+        }
+      ],
+      "valid": false
+    },
+    "FUNDING_HARV": {
+      "top10": [
+        {
+          "params": {
+            "trend_lookback": 240,
+            "trend_z_thresh": 2.5,
+            "max_hold_candles": 30,
+            "stop_pct": 0.008,
+            "tp_pct": 0.005
+          },
+          "metrics": {
+            "trades": 902,
+            "wins": 498,
+            "win_rate": 55.2,
+            "total_pnl": 4.36,
+            "total_pnl_pct": 0.87,
+            "profit_factor": 1.024,
+            "expectancy": 0.0048,
+            "sharpe": 6.22,
+            "max_dd_pct": 4.29,
+            "trades_per_day": 321.7,
+            "avg_edge_bps": 1.9
+          },
+          "score": 6.22,
+          "valid": false
+        },
+        {
+          "params": {
+            "trend_lookback": 60,
+            "trend_z_thresh": 2.0,
+            "max_hold_candles": 240,
+            "stop_pct": 0.008,
+            "tp_pct": 0.005
+          },
+          "metrics": {
+            "trades": 297,
+            "wins": 188,
+            "win_rate": 63.3,
+            "total_pnl": -7.53,
+            "total_pnl_pct": -1.51,
+            "profit_factor": 0.893,
+            "expectancy": -0.0254,
+            "sharpe": 2.912,
+            "max_dd_pct": 2.08,
+            "trades_per_day": 105.9,
+            "avg_edge_bps": -10.1
+          },
+          "score": 2.912,
+          "valid": false
+        },
+        {
+          "params": {
+            "trend_lookback": 120,
+            "trend_z_thresh": 2.5,
+            "max_hold_candles": 60,
+            "stop_pct": 0.012,
+            "tp_pct": 0.003
+          },
+          "metrics": {
+            "trades": 692,
+            "wins": 472,
+            "win_rate": 68.2,
+            "total_pnl": -1.61,
+            "total_pnl_pct": -0.32,
+            "profit_factor": 0.979,
+            "expectancy": -0.0023,
+            "sharpe": 1.957,
+            "max_dd_pct": 3.16,
+            "trades_per_day": 246.8,
+            "avg_edge_bps": -0.9
+          },
+          "score": 1.957,
+          "valid": false
+        },
+        {
+          "params": {
+            "trend_lookback": 240,
+            "trend_z_thresh": 2.5,
+            "max_hold_candles": 240,
+            "stop_pct": 0.012,
+            "tp_pct": 0.005
+          },
+          "metrics": {
+            "trades": 295,
+            "wins": 197,
+            "win_rate": 66.8,
+            "total_pnl": -9.83,
+            "total_pnl_pct": -1.97,
+            "profit_factor": 0.889,
+            "expectancy": -0.0333,
+            "sharpe": -0.408,
+            "max_dd_pct": 1.66,
+            "trades_per_day": 105.2,
+            "avg_edge_bps": -13.3
+          },
+          "score": -0.408,
+          "valid": false
+        },
+        {
+          "params": {
+            "trend_lookback": 120,
+            "trend_z_thresh": 2.5,
+            "max_hold_candles": 240,
+            "stop_pct": 0.012,
+            "tp_pct": 0.003
+          },
+          "metrics": {
+            "trades": 461,
+            "wins": 356,
+            "win_rate": 77.2,
+            "total_pnl": -3.4,
+            "total_pnl_pct": -0.68,
+            "profit_factor": 0.942,
+            "expectancy": -0.0074,
+            "sharpe": -0.524,
+            "max_dd_pct": 2.21,
+            "trades_per_day": 164.4,
+            "avg_edge_bps": -2.9
+          },
+          "score": -0.524,
+          "valid": false
+        },
+        {
+          "params": {
+            "trend_lookback": 240,
+            "trend_z_thresh": 2.5,
+            "max_hold_candles": 240,
+            "stop_pct": 0.012,
+            "tp_pct": 0.003
+          },
+          "metrics": {
+            "trades": 465,
+            "wins": 347,
+            "win_rate": 74.6,
+            "total_pnl": -6.59,
+            "total_pnl_pct": -1.32,
+            "profit_factor": 0.902,
+            "expectancy": -0.0142,
+            "sharpe": -0.638,
+            "max_dd_pct": 3.05,
+            "trades_per_day": 165.8,
+            "avg_edge_bps": -5.7
+          },
+          "score": -0.638,
+          "valid": false
+        },
+        {
+          "params": {
+            "trend_lookback": 240,
+            "trend_z_thresh": 2.5,
+            "max_hold_candles": 60,
+            "stop_pct": 0.008,
+            "tp_pct": 0.005
+          },
+          "metrics": {
+            "trades": 621,
+            "wins": 358,
+            "win_rate": 57.6,
+            "total_pnl": -9.01,
+            "total_pnl_pct": -1.8,
+            "profit_factor": 0.94,
+            "expectancy": -0.0145,
+            "sharpe": -1.004,
+            "max_dd_pct": 4.02,
+            "trades_per_day": 221.5,
+            "avg_edge_bps": -5.8
+          },
+          "score": -1.004,
+          "valid": false
+        },
+        {
+          "params": {
+            "trend_lookback": 60,
+            "trend_z_thresh": 1.5,
+            "max_hold_candles": 240,
+            "stop_pct": 0.012,
+            "tp_pct": 0.008
+          },
+          "metrics": {
+            "trades": 143,
+            "wins": 79,
+            "win_rate": 55.2,
+            "total_pnl": -13.33,
+            "total_pnl_pct": -2.67,
+            "profit_factor": 0.809,
+            "expectancy": -0.0932,
+            "sharpe": -1.26,
+            "max_dd_pct": 2.77,
+            "trades_per_day": 51.0,
+            "avg_edge_bps": -37.3
+          },
+          "score": -1.26,
+          "valid": false
+        },
+        {
+          "params": {
+            "trend_lookback": 120,
+            "trend_z_thresh": 2.5,
+            "max_hold_candles": 120,
+            "stop_pct": 0.012,
+            "tp_pct": 0.005
+          },
+          "metrics": {
+            "trades": 339,
+            "wins": 213,
+            "win_rate": 62.8,
+            "total_pnl": -20.73,
+            "total_pnl_pct": -4.15,
+            "profit_factor": 0.781,
+            "expectancy": -0.0611,
+            "sharpe": -2.69,
+            "max_dd_pct": 2.57,
+            "trades_per_day": 120.9,
+            "avg_edge_bps": -24.5
+          },
+          "score": -2.69,
+          "valid": false
+        },
+        {
+          "params": {
+            "trend_lookback": 60,
+            "trend_z_thresh": 2.0,
+            "max_hold_candles": 240,
+            "stop_pct": 0.012,
+            "tp_pct": 0.003
+          },
+          "metrics": {
+            "trades": 355,
+            "wins": 275,
+            "win_rate": 77.5,
+            "total_pnl": -8.41,
+            "total_pnl_pct": -1.68,
+            "profit_factor": 0.806,
+            "expectancy": -0.0237,
+            "sharpe": -3.122,
+            "max_dd_pct": 1.82,
+            "trades_per_day": 126.6,
+            "avg_edge_bps": -9.5
+          },
+          "score": -3.122,
+          "valid": false
+        }
+      ],
+      "valid": false
+    },
+    "LIQ_CASCADE": {
+      "top10": [
+        {
+          "params": {
+            "vol_lookback": 20,
+            "vol_z_thresh": 3.0,
+            "price_z_thresh": 2.5,
+            "bounce_target": 0.5,
+            "stop_mult": 2.0,
+            "max_hold_candles": 10
+          },
+          "metrics": {
+            "trades": 2567,
+            "wins": 1485,
+            "win_rate": 57.8,
+            "total_pnl": 39.3,
+            "total_pnl_pct": 7.86,
+            "profit_factor": 1.227,
+            "expectancy": 0.0153,
+            "sharpe": 16.298,
+            "max_dd_pct": 3.4,
+            "trades_per_day": 915.4,
+            "avg_edge_bps": 6.1
+          },
+          "score": 16.298,
+          "valid": true
+        },
+        {
+          "params": {
+            "vol_lookback": 10,
+            "vol_z_thresh": 3.0,
+            "price_z_thresh": 3.0,
+            "bounce_target": 0.5,
+            "stop_mult": 1.5,
+            "max_hold_candles": 10
+          },
+          "metrics": {
+            "trades": 2629,
+            "wins": 1511,
+            "win_rate": 57.5,
+            "total_pnl": 84.16,
+            "total_pnl_pct": 16.83,
+            "profit_factor": 1.497,
+            "expectancy": 0.032,
+            "sharpe": 14.179,
+            "max_dd_pct": 3.76,
+            "trades_per_day": 937.5,
+            "avg_edge_bps": 12.8
+          },
+          "score": 14.179,
+          "valid": true
+        },
+        {
+          "params": {
+            "vol_lookback": 30,
+            "vol_z_thresh": 4.0,
+            "price_z_thresh": 3.0,
+            "bounce_target": 0.3,
+            "stop_mult": 1.5,
+            "max_hold_candles": 10
+          },
+          "metrics": {
+            "trades": 1939,
+            "wins": 1259,
+            "win_rate": 64.9,
+            "total_pnl": 73.08,
+            "total_pnl_pct": 14.62,
+            "profit_factor": 1.672,
+            "expectancy": 0.0377,
+            "sharpe": 13.769,
+            "max_dd_pct": 2.2,
+            "trades_per_day": 691.5,
+            "avg_edge_bps": 15.1
+          },
+          "score": 13.769,
+          "valid": true
+        },
+        {
+          "params": {
+            "vol_lookback": 30,
+            "vol_z_thresh": 4.0,
+            "price_z_thresh": 3.0,
+            "bounce_target": 0.3,
+            "stop_mult": 1.0,
+            "max_hold_candles": 10
+          },
+          "metrics": {
+            "trades": 1978,
+            "wins": 1255,
+            "win_rate": 63.4,
+            "total_pnl": 73.46,
+            "total_pnl_pct": 14.69,
+            "profit_factor": 1.63,
+            "expectancy": 0.0371,
+            "sharpe": 13.462,
+            "max_dd_pct": 2.61,
+            "trades_per_day": 705.4,
+            "avg_edge_bps": 14.9
+          },
+          "score": 13.462,
+          "valid": true
+        },
+        {
+          "params": {
+            "vol_lookback": 10,
+            "vol_z_thresh": 3.0,
+            "price_z_thresh": 3.0,
+            "bounce_target": 0.3,
+            "stop_mult": 2.0,
+            "max_hold_candles": 10
+          },
+          "metrics": {
+            "trades": 2963,
+            "wins": 1839,
+            "win_rate": 62.1,
+            "total_pnl": 73.27,
+            "total_pnl_pct": 14.65,
+            "profit_factor": 1.556,
+            "expectancy": 0.0247,
+            "sharpe": 13.325,
+            "max_dd_pct": 4.4,
+            "trades_per_day": 1056.6,
+            "avg_edge_bps": 9.9
+          },
+          "score": 13.325,
+          "valid": true
+        },
+        {
+          "params": {
+            "vol_lookback": 20,
+            "vol_z_thresh": 3.0,
+            "price_z_thresh": 2.5,
+            "bounce_target": 0.5,
+            "stop_mult": 1.5,
+            "max_hold_candles": 10
+          },
+          "metrics": {
+            "trades": 2667,
+            "wins": 1530,
+            "win_rate": 57.4,
+            "total_pnl": 76.7,
+            "total_pnl_pct": 15.34,
+            "profit_factor": 1.397,
+            "expectancy": 0.0288,
+            "sharpe": 13.28,
+            "max_dd_pct": 3.26,
+            "trades_per_day": 951.1,
+            "avg_edge_bps": 11.5
+          },
+          "score": 13.28,
+          "valid": true
+        },
+        {
+          "params": {
+            "vol_lookback": 10,
+            "vol_z_thresh": 3.0,
+            "price_z_thresh": 3.0,
+            "bounce_target": 0.5,
+            "stop_mult": 2.0,
+            "max_hold_candles": 10
+          },
+          "metrics": {
+            "trades": 2538,
+            "wins": 1441,
+            "win_rate": 56.8,
+            "total_pnl": 76.39,
+            "total_pnl_pct": 15.28,
+            "profit_factor": 1.464,
+            "expectancy": 0.0301,
+            "sharpe": 13.181,
+            "max_dd_pct": 5.65,
+            "trades_per_day": 905.1,
+            "avg_edge_bps": 12.0
+          },
+          "score": 13.181,
+          "valid": true
+        },
+        {
+          "params": {
+            "vol_lookback": 30,
+            "vol_z_thresh": 4.0,
+            "price_z_thresh": 2.5,
+            "bounce_target": 0.3,
+            "stop_mult": 1.0,
+            "max_hold_candles": 10
+          },
+          "metrics": {
+            "trades": 2319,
+            "wins": 1450,
+            "win_rate": 62.5,
+            "total_pnl": 70.02,
+            "total_pnl_pct": 14.0,
+            "profit_factor": 1.544,
+            "expectancy": 0.0302,
+            "sharpe": 12.918,
+            "max_dd_pct": 2.6,
+            "trades_per_day": 827.0,
+            "avg_edge_bps": 12.1
+          },
+          "score": 12.918,
+          "valid": true
+        },
+        {
+          "params": {
+            "vol_lookback": 30,
+            "vol_z_thresh": 2.5,
+            "price_z_thresh": 2.0,
+            "bounce_target": 0.3,
+            "stop_mult": 1.5,
+            "max_hold_candles": 10
+          },
+          "metrics": {
+            "trades": 3515,
+            "wins": 2184,
+            "win_rate": 62.1,
+            "total_pnl": 68.2,
+            "total_pnl_pct": 13.64,
+            "profit_factor": 1.414,
+            "expectancy": 0.0194,
+            "sharpe": 12.558,
+            "max_dd_pct": 6.55,
+            "trades_per_day": 1253.5,
+            "avg_edge_bps": 7.8
+          },
+          "score": 12.558,
+          "valid": true
+        },
+        {
+          "params": {
+            "vol_lookback": 20,
+            "vol_z_thresh": 2.5,
+            "price_z_thresh": 2.0,
+            "bounce_target": 0.5,
+            "stop_mult": 1.5,
+            "max_hold_candles": 10
+          },
+          "metrics": {
+            "trades": 3117,
+            "wins": 1780,
+            "win_rate": 57.1,
+            "total_pnl": 72.41,
+            "total_pnl_pct": 14.48,
+            "profit_factor": 1.335,
+            "expectancy": 0.0232,
+            "sharpe": 12.374,
+            "max_dd_pct": 5.2,
+            "trades_per_day": 1111.6,
+            "avg_edge_bps": 9.3
+          },
+          "score": 12.374,
+          "valid": true
+        }
+      ],
+      "valid": true
+    },
+    "MTF_MOM": {
+      "top10": [
+        {
+          "params": {
+            "w1": 0.15,
+            "w5": 0.45,
+            "w15": 0.4,
+            "entry_threshold": 2.5,
+            "max_hold_candles": 20,
+            "vol_window": 20
+          },
+          "metrics": {
+            "trades": 2264,
+            "wins": 895,
+            "win_rate": 39.5,
+            "total_pnl": -57.4,
+            "total_pnl_pct": -11.48,
+            "profit_factor": 0.704,
+            "expectancy": -0.0254,
+            "sharpe": -21.109,
+            "max_dd_pct": 13.97,
+            "trades_per_day": 807.4,
+            "avg_edge_bps": -10.1
+          },
+          "score": -21.109,
+          "valid": false
+        },
+        {
+          "params": {
+            "w1": 0.15,
+            "w5": 0.45,
+            "w15": 0.4,
+            "entry_threshold": 2.5,
+            "max_hold_candles": 30,
+            "vol_window": 20
+          },
+          "metrics": {
+            "trades": 2379,
+            "wins": 940,
+            "win_rate": 39.5,
+            "total_pnl": -43.29,
+            "total_pnl_pct": -8.66,
+            "profit_factor": 0.774,
+            "expectancy": -0.0182,
+            "sharpe": -21.121,
+            "max_dd_pct": 14.21,
+            "trades_per_day": 848.4,
+            "avg_edge_bps": -7.3
+          },
+          "score": -21.121,
+          "valid": false
+        },
+        {
+          "params": {
+            "w1": 0.15,
+            "w5": 0.45,
+            "w15": 0.4,
+            "entry_threshold": 2.5,
+            "max_hold_candles": 15,
+            "vol_window": 20
+          },
+          "metrics": {
+            "trades": 2328,
+            "wins": 920,
+            "win_rate": 39.5,
+            "total_pnl": -46.71,
+            "total_pnl_pct": -9.34,
+            "profit_factor": 0.752,
+            "expectancy": -0.0201,
+            "sharpe": -21.142,
+            "max_dd_pct": 13.65,
+            "trades_per_day": 830.2,
+            "avg_edge_bps": -8.0
+          },
+          "score": -21.142,
+          "valid": false
+        },
+        {
+          "params": {
+            "w1": 0.2,
+            "w5": 0.4,
+            "w15": 0.4,
+            "entry_threshold": 2.5,
+            "max_hold_candles": 15,
+            "vol_window": 20
+          },
+          "metrics": {
+            "trades": 2541,
+            "wins": 1004,
+            "win_rate": 39.5,
+            "total_pnl": -51.01,
+            "total_pnl_pct": -10.2,
+            "profit_factor": 0.741,
+            "expectancy": -0.0201,
+            "sharpe": -21.32,
+            "max_dd_pct": 14.01,
+            "trades_per_day": 906.2,
+            "avg_edge_bps": -8.0
+          },
+          "score": -21.32,
+          "valid": false
+        },
+        {
+          "params": {
+            "w1": 0.2,
+            "w5": 0.4,
+            "w15": 0.4,
+            "entry_threshold": 2.5,
+            "max_hold_candles": 10,
+            "vol_window": 20
+          },
+          "metrics": {
+            "trades": 2250,
+            "wins": 875,
+            "win_rate": 38.9,
+            "total_pnl": -79.05,
+            "total_pnl_pct": -15.81,
+            "profit_factor": 0.62,
+            "expectancy": -0.0351,
+            "sharpe": -21.353,
+            "max_dd_pct": 13.46,
+            "trades_per_day": 802.4,
+            "avg_edge_bps": -14.1
+          },
+          "score": -21.353,
+          "valid": false
+        },
+        {
+          "params": {
+            "w1": 0.2,
+            "w5": 0.4,
+            "w15": 0.4,
+            "entry_threshold": 2.5,
+            "max_hold_candles": 30,
+            "vol_window": 20
+          },
+          "metrics": {
+            "trades": 2509,
+            "wins": 998,
+            "win_rate": 39.8,
+            "total_pnl": -51.9,
+            "total_pnl_pct": -10.38,
+            "profit_factor": 0.741,
+            "expectancy": -0.0207,
+            "sharpe": -21.385,
+            "max_dd_pct": 14.43,
+            "trades_per_day": 894.7,
+            "avg_edge_bps": -8.3
+          },
+          "score": -21.385,
+          "valid": false
+        },
+        {
+          "params": {
+            "w1": 0.2,
+            "w5": 0.45,
+            "w15": 0.35,
+            "entry_threshold": 2.5,
+            "max_hold_candles": 30,
+            "vol_window": 20
+          },
+          "metrics": {
+            "trades": 2512,
+            "wins": 999,
+            "win_rate": 39.8,
+            "total_pnl": -51.52,
+            "total_pnl_pct": -10.3,
+            "profit_factor": 0.738,
+            "expectancy": -0.0205,
+            "sharpe": -21.476,
+            "max_dd_pct": 14.27,
+            "trades_per_day": 895.8,
+            "avg_edge_bps": -8.2
+          },
+          "score": -21.476,
+          "valid": false
+        },
+        {
+          "params": {
+            "w1": 0.2,
+            "w5": 0.4,
+            "w15": 0.4,
+            "entry_threshold": 2.5,
+            "max_hold_candles": 20,
+            "vol_window": 20
+          },
+          "metrics": {
+            "trades": 2587,
+            "wins": 1016,
+            "win_rate": 39.3,
+            "total_pnl": -55.94,
+            "total_pnl_pct": -11.19,
+            "profit_factor": 0.72,
+            "expectancy": -0.0216,
+            "sharpe": -21.527,
+            "max_dd_pct": 14.23,
+            "trades_per_day": 922.6,
+            "avg_edge_bps": -8.6
+          },
+          "score": -21.527,
+          "valid": false
+        },
+        {
+          "params": {
+            "w1": 0.2,
+            "w5": 0.45,
+            "w15": 0.45,
+            "entry_threshold": 2.5,
+            "max_hold_candles": 30,
+            "vol_window": 20
+          },
+          "metrics": {
+            "trades": 3197,
+            "wins": 1280,
+            "win_rate": 40.0,
+            "total_pnl": -47.93,
+            "total_pnl_pct": -9.59,
+            "profit_factor": 0.794,
+            "expectancy": -0.015,
+            "sharpe": -21.571,
+            "max_dd_pct": 15.78,
+            "trades_per_day": 1140.1,
+            "avg_edge_bps": -6.0
+          },
+          "score": -21.571,
+          "valid": false
+        },
+        {
+          "params": {
+            "w1": 0.2,
+            "w5": 0.45,
+            "w15": 0.45,
+            "entry_threshold": 2.5,
+            "max_hold_candles": 20,
+            "vol_window": 20
+          },
+          "metrics": {
+            "trades": 3031,
+            "wins": 1203,
+            "win_rate": 39.7,
+            "total_pnl": -44.33,
+            "total_pnl_pct": -8.87,
+            "profit_factor": 0.793,
+            "expectancy": -0.0146,
+            "sharpe": -21.777,
+            "max_dd_pct": 14.88,
+            "trades_per_day": 1080.9,
+            "avg_edge_bps": -5.9
+          },
+          "score": -21.777,
+          "valid": false
+        }
+      ],
+      "valid": false
+    },
+    "VOL_REGIME": {
+      "top10": [
+        {
+          "params": {
+            "compression_threshold": 0.4,
+            "expansion_threshold": 1.5,
+            "stop_vol_mult": 4.0,
+            "min_squeeze_candles": 3,
+            "vol_short": 8,
+            "vol_medium": 45
+          },
+          "metrics": {
+            "trades": 26,
+            "wins": 14,
+            "win_rate": 53.8,
+            "total_pnl": -0.33,
+            "total_pnl_pct": -0.07,
+            "profit_factor": 0.983,
+            "expectancy": -0.0128,
+            "sharpe": -0.162,
+            "max_dd_pct": 2.14,
+            "trades_per_day": 9.3,
+            "avg_edge_bps": -5.1
+          },
+          "score": -0.162,
+          "valid": false
+        },
+        {
+          "params": {
+            "compression_threshold": 0.4,
+            "expansion_threshold": 1.5,
+            "stop_vol_mult": 4.0,
+            "min_squeeze_candles": 5,
+            "vol_short": 8,
+            "vol_medium": 45
+          },
+          "metrics": {
+            "trades": 26,
+            "wins": 14,
+            "win_rate": 53.8,
+            "total_pnl": -0.33,
+            "total_pnl_pct": -0.07,
+            "profit_factor": 0.983,
+            "expectancy": -0.0128,
+            "sharpe": -0.162,
+            "max_dd_pct": 2.14,
+            "trades_per_day": 9.3,
+            "avg_edge_bps": -5.1
+          },
+          "score": -0.162,
+          "valid": false
+        },
+        {
+          "params": {
+            "compression_threshold": 0.4,
+            "expansion_threshold": 1.5,
+            "stop_vol_mult": 4.0,
+            "min_squeeze_candles": 8,
+            "vol_short": 8,
+            "vol_medium": 45
+          },
+          "metrics": {
+            "trades": 26,
+            "wins": 14,
+            "win_rate": 53.8,
+            "total_pnl": -0.33,
+            "total_pnl_pct": -0.07,
+            "profit_factor": 0.983,
+            "expectancy": -0.0128,
+            "sharpe": -0.162,
+            "max_dd_pct": 2.14,
+            "trades_per_day": 9.3,
+            "avg_edge_bps": -5.1
+          },
+          "score": -0.162,
+          "valid": false
+        },
+        {
+          "params": {
+            "compression_threshold": 0.4,
+            "expansion_threshold": 1.5,
+            "stop_vol_mult": 4.0,
+            "min_squeeze_candles": 10,
+            "vol_short": 8,
+            "vol_medium": 45
+          },
+          "metrics": {
+            "trades": 26,
+            "wins": 14,
+            "win_rate": 53.8,
+            "total_pnl": -0.33,
+            "total_pnl_pct": -0.07,
+            "profit_factor": 0.983,
+            "expectancy": -0.0128,
+            "sharpe": -0.162,
+            "max_dd_pct": 2.14,
+            "trades_per_day": 9.3,
+            "avg_edge_bps": -5.1
+          },
+          "score": -0.162,
+          "valid": false
+        },
+        {
+          "params": {
+            "compression_threshold": 0.5,
+            "expansion_threshold": 1.5,
+            "stop_vol_mult": 4.0,
+            "min_squeeze_candles": 3,
+            "vol_short": 8,
+            "vol_medium": 45
+          },
+          "metrics": {
+            "trades": 47,
+            "wins": 23,
+            "win_rate": 48.9,
+            "total_pnl": -2.0,
+            "total_pnl_pct": -0.4,
+            "profit_factor": 0.944,
+            "expectancy": -0.0425,
+            "sharpe": -1.079,
+            "max_dd_pct": 4.73,
+            "trades_per_day": 16.8,
+            "avg_edge_bps": -17.0
+          },
+          "score": -1.079,
+          "valid": false
+        },
+        {
+          "params": {
+            "compression_threshold": 0.5,
+            "expansion_threshold": 1.5,
+            "stop_vol_mult": 4.0,
+            "min_squeeze_candles": 5,
+            "vol_short": 8,
+            "vol_medium": 45
+          },
+          "metrics": {
+            "trades": 47,
+            "wins": 23,
+            "win_rate": 48.9,
+            "total_pnl": -2.0,
+            "total_pnl_pct": -0.4,
+            "profit_factor": 0.944,
+            "expectancy": -0.0425,
+            "sharpe": -1.079,
+            "max_dd_pct": 4.73,
+            "trades_per_day": 16.8,
+            "avg_edge_bps": -17.0
+          },
+          "score": -1.079,
+          "valid": false
+        },
+        {
+          "params": {
+            "compression_threshold": 0.5,
+            "expansion_threshold": 1.5,
+            "stop_vol_mult": 4.0,
+            "min_squeeze_candles": 8,
+            "vol_short": 8,
+            "vol_medium": 45
+          },
+          "metrics": {
+            "trades": 47,
+            "wins": 23,
+            "win_rate": 48.9,
+            "total_pnl": -2.0,
+            "total_pnl_pct": -0.4,
+            "profit_factor": 0.944,
+            "expectancy": -0.0425,
+            "sharpe": -1.079,
+            "max_dd_pct": 4.73,
+            "trades_per_day": 16.8,
+            "avg_edge_bps": -17.0
+          },
+          "score": -1.079,
+          "valid": false
+        },
+        {
+          "params": {
+            "compression_threshold": 0.5,
+            "expansion_threshold": 1.5,
+            "stop_vol_mult": 4.0,
+            "min_squeeze_candles": 10,
+            "vol_short": 8,
+            "vol_medium": 45
+          },
+          "metrics": {
+            "trades": 47,
+            "wins": 23,
+            "win_rate": 48.9,
+            "total_pnl": -2.0,
+            "total_pnl_pct": -0.4,
+            "profit_factor": 0.944,
+            "expectancy": -0.0425,
+            "sharpe": -1.079,
+            "max_dd_pct": 4.73,
+            "trades_per_day": 16.8,
+            "avg_edge_bps": -17.0
+          },
+          "score": -1.079,
+          "valid": false
+        },
+        {
+          "params": {
+            "compression_threshold": 0.5,
+            "expansion_threshold": 1.5,
+            "stop_vol_mult": 3.0,
+            "min_squeeze_candles": 3,
+            "vol_short": 8,
+            "vol_medium": 45
+          },
+          "metrics": {
+            "trades": 47,
+            "wins": 22,
+            "win_rate": 46.8,
+            "total_pnl": -3.16,
+            "total_pnl_pct": -0.63,
+            "profit_factor": 0.906,
+            "expectancy": -0.0673,
+            "sharpe": -1.961,
+            "max_dd_pct": 4.47,
+            "trades_per_day": 16.8,
+            "avg_edge_bps": -26.9
+          },
+          "score": -1.961,
+          "valid": false
+        },
+        {
+          "params": {
+            "compression_threshold": 0.5,
+            "expansion_threshold": 1.5,
+            "stop_vol_mult": 3.0,
+            "min_squeeze_candles": 5,
+            "vol_short": 8,
+            "vol_medium": 45
+          },
+          "metrics": {
+            "trades": 47,
+            "wins": 22,
+            "win_rate": 46.8,
+            "total_pnl": -3.16,
+            "total_pnl_pct": -0.63,
+            "profit_factor": 0.906,
+            "expectancy": -0.0673,
+            "sharpe": -1.961,
+            "max_dd_pct": 4.47,
+            "trades_per_day": 16.8,
+            "avg_edge_bps": -26.9
+          },
+          "score": -1.961,
+          "valid": false
+        }
+      ],
+      "valid": false
+    }
+  },
+  "validated": {
+    "LIQ_CASCADE": {
+      "params": {
+        "vol_lookback": 20,
+        "vol_z_thresh": 3.0,
+        "price_z_thresh": 2.5,
+        "bounce_target": 0.5,
+        "stop_mult": 2.0,
+        "max_hold_candles": 10
+      },
+      "metrics": {
+        "trades": 2567,
+        "wins": 1485,
+        "win_rate": 57.8,
+        "total_pnl": 39.3,
+        "total_pnl_pct": 7.86,
+        "profit_factor": 1.227,
+        "expectancy": 0.0153,
+        "sharpe": 16.298,
+        "max_dd_pct": 3.4,
+        "trades_per_day": 915.4,
+        "avg_edge_bps": 6.1
+      }
+    }
+  },
+  "portfolio_allocation": {
+    "LIQ_CASCADE": 1.0
+  }
+}

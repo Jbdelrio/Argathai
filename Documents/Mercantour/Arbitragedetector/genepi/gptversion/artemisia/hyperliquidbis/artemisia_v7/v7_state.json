@@ -1,0 +1,54 @@
+{
+  "equity": 491.6403996795826,
+  "paper": true,
+  "positions": [
+    {
+      "symbol": "HYPE",
+      "strategy": "s1_funding_arb",
+      "side": "short",
+      "size_usd": 73.74605995193738,
+      "entry_price": 39.4925,
+      "stop_price": 40.677275,
+      "tp_price": null,
+      "entry_time": 1776812013.7537663
+    },
+    {
+      "symbol": "AAVE",
+      "strategy": "s1_funding_arb",
+      "side": "short",
+      "size_usd": 73.74605995193738,
+      "entry_price": 90.9115,
+      "stop_price": 93.638845,
+      "tp_price": null,
+      "entry_time": 1776812013.7537663
+    },
+    {
+      "symbol": "ZEC",
+      "strategy": "s1_funding_arb",
+      "side": "short",
+      "size_usd": 73.74605995193738,
+      "entry_price": 310.495,
+      "stop_price": 319.80985000000004,
+      "tp_price": null,
+      "entry_time": 1776812013.7547753
+    }
+  ],
+  "kill_status": {
+    "equity": 491.6403996795826,
+    "daily_dd_pct": 1.6719200640834857,
+    "total_dd_pct": 1.6719200640834857,
+    "open_positions": 3,
+    "trades_today": 6,
+    "killed": false,
+    "kill_reasons": {
+      "daily_dd": false,
+      "total_dd": false,
+      "network": false,
+      "manual": false
+    },
+    "cascade_level": "REDUCED_50",
+    "cascade_multiplier": 0.5,
+    "since_last_poll_s": 0.0
+  },
+  "timestamp": 1776816378.5718536
+}

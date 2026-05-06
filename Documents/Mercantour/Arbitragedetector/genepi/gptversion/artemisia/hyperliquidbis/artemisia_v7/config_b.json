@@ -1,0 +1,145 @@
+{
+  "_comment": "Artemisia v7 — Instance B: S6 trades through EXPLOSION regime (comparison vs config.json)",
+
+  "capital": {
+    "initial_usdc": 500.0,
+    "max_position_size": 0.05,
+    "max_simultaneous_positions": 3,
+    "leverage_directional": 3.0,
+    "leverage_neutral": 5.0
+  },
+
+  "risk": {
+    "max_loss_per_trade_pct": 0.02,
+    "daily_dd_kill_pct": 0.02,
+    "total_dd_hard_stop_pct": 0.10,
+    "watchdog_interval_s": 60,
+    "network_timeout_s": 120,
+    "reentry_cooldown_s": 1800,
+    "kelly_fraction": 0.25,
+    "kelly_min_edge_bps": 2.0,
+    "dd_reduction_threshold_pct": 0.04,
+    "dd_reduction_factor": 0.5,
+    "cascading_dd_levels": [
+      [0.015, 0.50],
+      [0.025, 0.25],
+      [0.04, 0.00]
+    ]
+  },
+
+  "universe": {
+    "min_volume_usd_24h": 10000000,
+    "max_spread_bps": 8.0,
+    "top_n": 20,
+    "refresh_interval_h": 24
+  },
+
+  "data": {
+    "candle_interval": "15m",
+    "candle_days": 55,
+    "funding_history_rows": 500,
+    "cache_dir": "data/cache",
+    "cache_max_age_h": 6.0,
+    "api_url": "https://api.hyperliquid.xyz/info",
+    "batch_minutes": 480,
+    "max_workers": 8
+  },
+
+  "fees": {
+    "maker_rebate_bps": 0.3,
+    "taker_fee_bps": 2.5,
+    "slippage_bps": 0.8,
+    "roundtrip_maker_bps": 4.8,
+    "roundtrip_taker_bps": 6.6
+  },
+
+  "backtest": {
+    "n_folds": 4,
+    "train_days": 35,
+    "test_days": 5,
+    "min_oos_sharpe": 1.2,
+    "min_fold_sharpe": 0.3,
+    "max_dd_pct": 8.0,
+    "min_profit_factor": 1.1,
+    "monte_carlo_sims": 1000,
+    "monte_carlo_p5_sharpe": 0.0,
+    "min_trades": 20
+  },
+
+  "strategies": {
+    "s1_funding_arb": {
+      "enabled": true,
+      "min_funding_annual_pct": 10.0,
+      "exit_funding_annual_pct": 3.0,
+      "min_spread_capture_bps": 5.0,
+      "max_hold_hours": 2,
+      "entry_order_type": "maker",
+      "hedge_correlation_min": 0.7,
+      "funding_ewma_alpha": 0.1
+    },
+    "s2_maker_mr": {
+      "enabled": false,
+      "bb_period": 20,
+      "bb_std": 2.0,
+      "rsi_period": 14,
+      "rsi_oversold": 35,
+      "rsi_overbought": 65,
+      "atr_period": 14,
+      "stop_atr_mult": 2.0,
+      "tp_bb_mid": true,
+      "entry_order_type": "maker",
+      "candle_interval": "15m"
+    },
+    "s3_pairs_kalman": {
+      "enabled": true,
+      "entry_zscore": 2.0,
+      "exit_zscore": 0.5,
+      "stop_zscore": 3.5,
+      "adf_pvalue_max": 0.05,
+      "min_correlation": 0.80,
+      "lookback_days": 30,
+      "kalman_transition_cov": 0.0001,
+      "kalman_observation_cov": 1.0,
+      "position_pct": 0.10,
+      "max_pairs": 5,
+      "half_life_min_bars": 6,
+      "half_life_max_bars": 48
+    },
+    "s4_regime_router": {
+      "enabled": true,
+      "n_regimes": 3,
+      "hysteresis_steps": 8,
+      "min_duration_candles": 8,
+      "confidence_threshold": 0.7,
+      "regime_features": ["volatility", "volume_ratio", "price_trend", "funding_premium"],
+      "calm_strategies": ["s1_funding_arb", "s3_pairs_kalman", "s6_adaptive_trend"],
+      "normal_strategies": ["s1_funding_arb", "s3_pairs_kalman", "s6_adaptive_trend"],
+      "explosion_strategies": ["s6_adaptive_trend"],
+      "gmm_retrain_hours": 168
+    },
+    "s6_adaptive_trend": {
+      "enabled": true,
+      "composite_threshold": 0.7,
+      "sharpe_filter_long": 0.8,
+      "sharpe_filter_short": 1.2,
+      "atr_stop_mult": 2.5,
+      "max_hold_bars": 28,
+      "base_position_pct": 0.10,
+      "max_position_pct": 0.15
+    }
+  },
+
+  "paper_trading": {
+    "min_days_before_live": 30,
+    "paper_sharpe_min": 1.0,
+    "paper_dd_max_pct": 4.0
+  },
+
+  "logging": {
+    "level": "INFO",
+    "file": "logs/artemisia_v7_B.log",
+    "state_file": "v7_state_B.json",
+    "trade_log": "logs/trades_v7_B.csv",
+    "terminal_frequency_seconds": 60
+  }
+}

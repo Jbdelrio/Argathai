@@ -1,0 +1,44 @@
+{
+  "equity": 490.3130628528749,
+  "paper": true,
+  "positions": [
+    {
+      "symbol": "HYPE",
+      "strategy": "s1_funding_arb",
+      "side": "short",
+      "size_usd": 73.89171723894736,
+      "entry_price": 40.192,
+      "stop_price": 41.39776,
+      "tp_price": null,
+      "entry_time": 1776833629.432569
+    },
+    {
+      "symbol": "AAVE",
+      "strategy": "s1_funding_arb",
+      "side": "short",
+      "size_usd": 73.89171723894736,
+      "entry_price": 92.5885,
+      "stop_price": 95.36615499999999,
+      "tp_price": null,
+      "entry_time": 1776833629.432569
+    }
+  ],
+  "kill_status": {
+    "equity": 490.3130628528749,
+    "daily_dd_pct": 1.9373874294250186,
+    "total_dd_pct": 2.037798087231347,
+    "open_positions": 2,
+    "trades_today": 15,
+    "killed": false,
+    "kill_reasons": {
+      "daily_dd": false,
+      "total_dd": false,
+      "network": false,
+      "manual": false
+    },
+    "cascade_level": "REDUCED_50",
+    "cascade_multiplier": 0.5,
+    "since_last_poll_s": 0.0
+  },
+  "timestamp": 1776840785.180676
+}

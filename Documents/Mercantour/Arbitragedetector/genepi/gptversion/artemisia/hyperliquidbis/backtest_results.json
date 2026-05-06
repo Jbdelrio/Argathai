@@ -1,0 +1,665 @@
+{
+  "generated_at": "2026-04-16T14:05:08.373948+00:00",
+  "data_symbols": [
+    "ETH",
+    "SOL",
+    "DOGE",
+    "XRP",
+    "SUI",
+    "AVAX",
+    "LINK",
+    "HYPE",
+    "FARTCOIN"
+  ],
+  "data_candles": {
+    "ETH": 5128,
+    "SOL": 5120,
+    "DOGE": 5104,
+    "XRP": 5075,
+    "SUI": 5100,
+    "AVAX": 5120,
+    "LINK": 5092,
+    "HYPE": 5229,
+    "FARTCOIN": 5215
+  },
+  "baseline": {
+    "metrics": {
+      "trades": 456,
+      "wins": 266,
+      "losses": 190,
+      "win_rate": 58.3,
+      "total_pnl": -6.04,
+      "total_pnl_pct": -1.21,
+      "total_fees": 6.98,
+      "final_equity": 493.96,
+      "max_dd_pct": 1.8,
+      "profit_factor": 0.822,
+      "expectancy": -0.0132,
+      "sharpe": -7.783,
+      "by_strategy": {
+        "EMA": {
+          "trades": 82,
+          "win_rate": 47.6,
+          "pnl": -0.97
+        },
+        "RSI": {
+          "trades": 228,
+          "win_rate": 64.0,
+          "pnl": 0.17
+        },
+        "VWAP": {
+          "trades": 146,
+          "win_rate": 55.5,
+          "pnl": -5.23
+        }
+      }
+    },
+    "params": {
+      "initial_capital": 500.0,
+      "base_position_pct": 0.06,
+      "max_leverage": 8.0,
+      "min_leverage": 3.0,
+      "max_simultaneous": 3,
+      "maker_fee": 0.00016,
+      "slippage_bps": 0.8,
+      "stop_pct": 0.004,
+      "tp_pct": 0.001,
+      "ema_fast": 8,
+      "ema_slow": 34,
+      "ema_atr_mult": 0.5,
+      "ema_hold_candles": 3,
+      "rsi_period": 14,
+      "rsi_oversold": 28,
+      "rsi_overbought": 78,
+      "rsi_hold_candles": 5,
+      "vwap_period": 30,
+      "vwap_max_dist": 0.004,
+      "vwap_atr_mult": 0.5,
+      "vwap_hold_candles": 6,
+      "breakeven_after_candles": 3,
+      "cooldown_candles": 1,
+      "cooldown_after_loss": 2,
+      "max_trades_per_symbol_hour": 8,
+      "min_edge_bps": 5.0,
+      "enable_ema": true,
+      "enable_rsi": true,
+      "enable_vwap": true
+    }
+  },
+  "best": {
+    "metrics": {
+      "trades": 767,
+      "wins": 379,
+      "losses": 388,
+      "win_rate": 49.4,
+      "total_pnl": -7.48,
+      "total_pnl_pct": -1.5,
+      "total_fees": 11.68,
+      "final_equity": 492.52,
+      "max_dd_pct": 2.52,
+      "profit_factor": 0.872,
+      "expectancy": -0.0098,
+      "sharpe": -7.209,
+      "by_strategy": {
+        "EMA": {
+          "trades": 80,
+          "win_rate": 42.5,
+          "pnl": -0.36
+        },
+        "RSI": {
+          "trades": 397,
+          "win_rate": 53.1,
+          "pnl": -2.69
+        },
+        "VWAP": {
+          "trades": 290,
+          "win_rate": 46.2,
+          "pnl": -4.43
+        }
+      }
+    },
+    "params": {
+      "initial_capital": 500.0,
+      "base_position_pct": 0.06,
+      "max_leverage": 8.0,
+      "min_leverage": 3.0,
+      "max_simultaneous": 3,
+      "maker_fee": 0.00016,
+      "slippage_bps": 0.8,
+      "breakeven_after_candles": 3,
+      "cooldown_candles": 1,
+      "cooldown_after_loss": 2,
+      "max_trades_per_symbol_hour": 8,
+      "min_edge_bps": 5.0,
+      "enable_ema": true,
+      "enable_rsi": true,
+      "enable_vwap": true,
+      "stop_pct": 0.003,
+      "tp_pct": 0.0025,
+      "ema_fast": 8,
+      "ema_slow": 34,
+      "ema_atr_mult": 0.5,
+      "ema_hold_candles": 8,
+      "rsi_period": 14,
+      "rsi_oversold": 32,
+      "rsi_overbought": 75,
+      "rsi_hold_candles": 5,
+      "vwap_period": 10,
+      "vwap_max_dist": 0.005,
+      "vwap_atr_mult": 0.5,
+      "vwap_hold_candles": 6
+    }
+  },
+  "top10": [
+    {
+      "rank": 1,
+      "score": -7.209,
+      "metrics": {
+        "trades": 767,
+        "wins": 379,
+        "losses": 388,
+        "win_rate": 49.4,
+        "total_pnl": -7.48,
+        "total_pnl_pct": -1.5,
+        "total_fees": 11.68,
+        "final_equity": 492.52,
+        "max_dd_pct": 2.52,
+        "profit_factor": 0.872,
+        "expectancy": -0.0098,
+        "sharpe": -7.209,
+        "by_strategy": {
+          "EMA": {
+            "trades": 80,
+            "win_rate": 42.5,
+            "pnl": -0.36
+          },
+          "RSI": {
+            "trades": 397,
+            "win_rate": 53.1,
+            "pnl": -2.69
+          },
+          "VWAP": {
+            "trades": 290,
+            "win_rate": 46.2,
+            "pnl": -4.43
+          }
+        }
+      },
+      "params": {
+        "stop_pct": 0.003,
+        "tp_pct": 0.0025,
+        "ema_fast": 8,
+        "ema_slow": 34,
+        "ema_atr_mult": 0.5,
+        "ema_hold_candles": 8,
+        "rsi_period": 14,
+        "rsi_oversold": 32,
+        "rsi_overbought": 75,
+        "rsi_hold_candles": 5,
+        "vwap_period": 10,
+        "vwap_max_dist": 0.005,
+        "vwap_atr_mult": 0.5,
+        "vwap_hold_candles": 6
+      }
+    },
+    {
+      "rank": 2,
+      "score": -7.309,
+      "metrics": {
+        "trades": 774,
+        "wins": 388,
+        "losses": 386,
+        "win_rate": 50.1,
+        "total_pnl": -6.6,
+        "total_pnl_pct": -1.32,
+        "total_fees": 11.61,
+        "final_equity": 493.44,
+        "max_dd_pct": 1.49,
+        "profit_factor": 0.864,
+        "expectancy": -0.0085,
+        "sharpe": -7.309,
+        "by_strategy": {
+          "EMA": {
+            "trades": 141,
+            "win_rate": 42.6,
+            "pnl": -3.86
+          },
+          "RSI": {
+            "trades": 310,
+            "win_rate": 58.4,
+            "pnl": 4.02
+          },
+          "VWAP": {
+            "trades": 322,
+            "win_rate": 45.7,
+            "pnl": -6.72
+          }
+        }
+      },
+      "params": {
+        "stop_pct": 0.004,
+        "tp_pct": 0.002,
+        "ema_fast": 5,
+        "ema_slow": 13,
+        "ema_atr_mult": 0.5,
+        "ema_hold_candles": 3,
+        "rsi_period": 14,
+        "rsi_oversold": 28,
+        "rsi_overbought": 75,
+        "rsi_hold_candles": 3,
+        "vwap_period": 30,
+        "vwap_max_dist": 0.003,
+        "vwap_atr_mult": 0.7,
+        "vwap_hold_candles": 3
+      }
+    },
+    {
+      "rank": 3,
+      "score": -7.646,
+      "metrics": {
+        "trades": 623,
+        "wins": 325,
+        "losses": 298,
+        "win_rate": 52.2,
+        "total_pnl": -6.12,
+        "total_pnl_pct": -1.22,
+        "total_fees": 9.14,
+        "final_equity": 493.88,
+        "max_dd_pct": 1.58,
+        "profit_factor": 0.851,
+        "expectancy": -0.0098,
+        "sharpe": -7.646,
+        "by_strategy": {
+          "EMA": {
+            "trades": 130,
+            "win_rate": 53.8,
+            "pnl": -3.95
+          },
+          "RSI": {
+            "trades": 182,
+            "win_rate": 58.2,
+            "pnl": 0.98
+          },
+          "VWAP": {
+            "trades": 311,
+            "win_rate": 47.9,
+            "pnl": -3.14
+          }
+        }
+      },
+      "params": {
+        "stop_pct": 0.004,
+        "tp_pct": 0.0015,
+        "ema_fast": 8,
+        "ema_slow": 13,
+        "ema_atr_mult": 0.5,
+        "ema_hold_candles": 8,
+        "rsi_period": 21,
+        "rsi_oversold": 32,
+        "rsi_overbought": 75,
+        "rsi_hold_candles": 5,
+        "vwap_period": 10,
+        "vwap_max_dist": 0.005,
+        "vwap_atr_mult": 0.5,
+        "vwap_hold_candles": 3
+      }
+    },
+    {
+      "rank": 4,
+      "score": -7.783,
+      "metrics": {
+        "trades": 456,
+        "wins": 266,
+        "losses": 190,
+        "win_rate": 58.3,
+        "total_pnl": -6.04,
+        "total_pnl_pct": -1.21,
+        "total_fees": 6.98,
+        "final_equity": 493.96,
+        "max_dd_pct": 1.8,
+        "profit_factor": 0.822,
+        "expectancy": -0.0132,
+        "sharpe": -7.783,
+        "by_strategy": {
+          "EMA": {
+            "trades": 82,
+            "win_rate": 47.6,
+            "pnl": -0.97
+          },
+          "RSI": {
+            "trades": 228,
+            "win_rate": 64.0,
+            "pnl": 0.17
+          },
+          "VWAP": {
+            "trades": 146,
+            "win_rate": 55.5,
+            "pnl": -5.23
+          }
+        }
+      },
+      "params": {
+        "stop_pct": 0.004,
+        "tp_pct": 0.001,
+        "ema_fast": 8,
+        "ema_slow": 34,
+        "ema_atr_mult": 0.5,
+        "ema_hold_candles": 3,
+        "rsi_period": 14,
+        "rsi_oversold": 28,
+        "rsi_overbought": 78,
+        "rsi_hold_candles": 5,
+        "vwap_period": 30,
+        "vwap_max_dist": 0.004,
+        "vwap_atr_mult": 0.5,
+        "vwap_hold_candles": 6
+      }
+    },
+    {
+      "rank": 5,
+      "score": -8.397,
+      "metrics": {
+        "trades": 685,
+        "wins": 377,
+        "losses": 308,
+        "win_rate": 55.0,
+        "total_pnl": -6.69,
+        "total_pnl_pct": -1.34,
+        "total_fees": 10.52,
+        "final_equity": 493.31,
+        "max_dd_pct": 1.99,
+        "profit_factor": 0.843,
+        "expectancy": -0.0098,
+        "sharpe": -8.397,
+        "by_strategy": {
+          "EMA": {
+            "trades": 107,
+            "win_rate": 56.1,
+            "pnl": -1.95
+          },
+          "RSI": {
+            "trades": 375,
+            "win_rate": 60.0,
+            "pnl": 0.94
+          },
+          "VWAP": {
+            "trades": 203,
+            "win_rate": 45.3,
+            "pnl": -5.68
+          }
+        }
+      },
+      "params": {
+        "stop_pct": 0.002,
+        "tp_pct": 0.001,
+        "ema_fast": 8,
+        "ema_slow": 21,
+        "ema_atr_mult": 0.5,
+        "ema_hold_candles": 5,
+        "rsi_period": 10,
+        "rsi_oversold": 25,
+        "rsi_overbought": 78,
+        "rsi_hold_candles": 5,
+        "vwap_period": 20,
+        "vwap_max_dist": 0.005,
+        "vwap_atr_mult": 0.5,
+        "vwap_hold_candles": 3
+      }
+    },
+    {
+      "rank": 6,
+      "score": -9.775,
+      "metrics": {
+        "trades": 970,
+        "wins": 596,
+        "losses": 374,
+        "win_rate": 61.4,
+        "total_pnl": -11.17,
+        "total_pnl_pct": -2.23,
+        "total_fees": 14.91,
+        "final_equity": 488.85,
+        "max_dd_pct": 2.69,
+        "profit_factor": 0.825,
+        "expectancy": -0.0115,
+        "sharpe": -9.775,
+        "by_strategy": {
+          "EMA": {
+            "trades": 196,
+            "win_rate": 62.2,
+            "pnl": -4.93
+          },
+          "RSI": {
+            "trades": 722,
+            "win_rate": 61.1,
+            "pnl": -6.13
+          },
+          "VWAP": {
+            "trades": 51,
+            "win_rate": 64.7,
+            "pnl": -0.1
+          }
+        }
+      },
+      "params": {
+        "stop_pct": 0.005,
+        "tp_pct": 0.001,
+        "ema_fast": 3,
+        "ema_slow": 13,
+        "ema_atr_mult": 0.5,
+        "ema_hold_candles": 8,
+        "rsi_period": 10,
+        "rsi_oversold": 22,
+        "rsi_overbought": 68,
+        "rsi_hold_candles": 5,
+        "vwap_period": 30,
+        "vwap_max_dist": 0.005,
+        "vwap_atr_mult": 0.5,
+        "vwap_hold_candles": 3
+      }
+    },
+    {
+      "rank": 7,
+      "score": -10.082,
+      "metrics": {
+        "trades": 745,
+        "wins": 363,
+        "losses": 382,
+        "win_rate": 48.7,
+        "total_pnl": -9.39,
+        "total_pnl_pct": -1.88,
+        "total_fees": 11.36,
+        "final_equity": 490.78,
+        "max_dd_pct": 2.49,
+        "profit_factor": 0.816,
+        "expectancy": -0.0126,
+        "sharpe": -10.082,
+        "by_strategy": {
+          "EMA": {
+            "trades": 118,
+            "win_rate": 50.8,
+            "pnl": -1.63
+          },
+          "RSI": {
+            "trades": 421,
+            "win_rate": 48.7,
+            "pnl": -1.24
+          },
+          "VWAP": {
+            "trades": 205,
+            "win_rate": 47.8,
+            "pnl": -6.34
+          }
+        }
+      },
+      "params": {
+        "stop_pct": 0.005,
+        "tp_pct": 0.002,
+        "ema_fast": 8,
+        "ema_slow": 13,
+        "ema_atr_mult": 0.5,
+        "ema_hold_candles": 5,
+        "rsi_period": 14,
+        "rsi_oversold": 28,
+        "rsi_overbought": 72,
+        "rsi_hold_candles": 3,
+        "vwap_period": 15,
+        "vwap_max_dist": 0.003,
+        "vwap_atr_mult": 0.5,
+        "vwap_hold_candles": 6
+      }
+    },
+    {
+      "rank": 8,
+      "score": -10.416,
+      "metrics": {
+        "trades": 1166,
+        "wins": 615,
+        "losses": 551,
+        "win_rate": 52.7,
+        "total_pnl": -12.38,
+        "total_pnl_pct": -2.48,
+        "total_fees": 18.24,
+        "final_equity": 487.62,
+        "max_dd_pct": 2.82,
+        "profit_factor": 0.843,
+        "expectancy": -0.0106,
+        "sharpe": -10.416,
+        "by_strategy": {
+          "EMA": {
+            "trades": 291,
+            "win_rate": 46.0,
+            "pnl": -5.65
+          },
+          "RSI": {
+            "trades": 747,
+            "win_rate": 55.7,
+            "pnl": -2.56
+          },
+          "VWAP": {
+            "trades": 128,
+            "win_rate": 50.8,
+            "pnl": -4.18
+          }
+        }
+      },
+      "params": {
+        "stop_pct": 0.004,
+        "tp_pct": 0.0015,
+        "ema_fast": 8,
+        "ema_slow": 21,
+        "ema_atr_mult": 0.8,
+        "ema_hold_candles": 8,
+        "rsi_period": 10,
+        "rsi_oversold": 25,
+        "rsi_overbought": 68,
+        "rsi_hold_candles": 5,
+        "vwap_period": 30,
+        "vwap_max_dist": 0.005,
+        "vwap_atr_mult": 0.5,
+        "vwap_hold_candles": 4
+      }
+    },
+    {
+      "rank": 9,
+      "score": -10.561,
+      "metrics": {
+        "trades": 1555,
+        "wins": 698,
+        "losses": 857,
+        "win_rate": 44.9,
+        "total_pnl": -11.99,
+        "total_pnl_pct": -2.4,
+        "total_fees": 22.84,
+        "final_equity": 488.04,
+        "max_dd_pct": 2.97,
+        "profit_factor": 0.855,
+        "expectancy": -0.0077,
+        "sharpe": -10.561,
+        "by_strategy": {
+          "EMA": {
+            "trades": 89,
+            "win_rate": 41.6,
+            "pnl": -2.03
+          },
+          "RSI": {
+            "trades": 1277,
+            "win_rate": 45.3,
+            "pnl": -6.68
+          },
+          "VWAP": {
+            "trades": 187,
+            "win_rate": 43.9,
+            "pnl": -3.25
+          }
+        }
+      },
+      "params": {
+        "stop_pct": 0.0025,
+        "tp_pct": 0.003,
+        "ema_fast": 5,
+        "ema_slow": 21,
+        "ema_atr_mult": 0.5,
+        "ema_hold_candles": 5,
+        "rsi_period": 7,
+        "rsi_oversold": 32,
+        "rsi_overbought": 75,
+        "rsi_hold_candles": 3,
+        "vwap_period": 15,
+        "vwap_max_dist": 0.003,
+        "vwap_atr_mult": 0.5,
+        "vwap_hold_candles": 4
+      }
+    },
+    {
+      "rank": 10,
+      "score": -10.586,
+      "metrics": {
+        "trades": 728,
+        "wins": 353,
+        "losses": 375,
+        "win_rate": 48.5,
+        "total_pnl": -10.24,
+        "total_pnl_pct": -2.05,
+        "total_fees": 11.49,
+        "final_equity": 489.79,
+        "max_dd_pct": 2.73,
+        "profit_factor": 0.804,
+        "expectancy": -0.0141,
+        "sharpe": -10.586,
+        "by_strategy": {
+          "EMA": {
+            "trades": 200,
+            "win_rate": 43.5,
+            "pnl": -3.85
+          },
+          "RSI": {
+            "trades": 455,
+            "win_rate": 51.6,
+            "pnl": -5.45
+          },
+          "VWAP": {
+            "trades": 72,
+            "win_rate": 43.1,
+            "pnl": -0.91
+          }
+        }
+      },
+      "params": {
+        "stop_pct": 0.0025,
+        "tp_pct": 0.002,
+        "ema_fast": 3,
+        "ema_slow": 13,
+        "ema_atr_mult": 0.5,
+        "ema_hold_candles": 8,
+        "rsi_period": 14,
+        "rsi_oversold": 32,
+        "rsi_overbought": 75,
+        "rsi_hold_candles": 3,
+        "vwap_period": 20,
+        "vwap_max_dist": 0.004,
+        "vwap_atr_mult": 0.5,
+        "vwap_hold_candles": 3
+      }
+    }
+  ]
+}
