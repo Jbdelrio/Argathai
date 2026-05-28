@@ -1,0 +1,8 @@
+dash>=2.18
+plotly>=5.22
+pandas>=2.2
+numpy>=1.26
+httpx>=0.27
+scipy>=1.12
+arch>=7.0
+pykalman>=0.9.7

@@ -1,0 +1,317 @@
+# CYBORG – version reconstruite
+
+Cette version a été refaite pour corriger les problèmes qui rendaient le GUI quasiment inutilisable.
+
+## Ce qui change vraiment
+
+### 1. Plus aucune donnée fake au démarrage
+Avant, l'application injectait des trades et marchés simulés dès le lancement.
+
+Maintenant :
+- au lancement, le portefeuille est vide
+- PnL = 0
+- aucun trade n'apparaît
+- aucune stratégie ne tourne tant que tu n'as pas cliqué sur `START`
+
+### 2. Les contrôles ne se remettent plus aux valeurs par défaut
+Les champs Dash sont maintenant montés une seule fois et persistent dans la session.
+
+Tu peux modifier :
+- le capital total
+- l'allocation BetMiss
+- l'allocation Coin5min
+- le seuil d'edge BetMiss
+- la taille par trade BetMiss
+- la confiance minimale Coin5min
+- la taille par trade Coin5min
+- l'intervalle Coin5min
+- la liste d'actifs Coin5min
+
+Ces paramètres ne sont plus remplacés par un rerender complet de la page.
+
+### 3. `START` lance une vraie boucle live paper
+Les boutons ne se contentent plus de changer un booléen dans l'UI.
+
+Maintenant :
+- `START` active réellement la boucle de polling de la stratégie
+- `PAUSE` suspend la logique de paper trading
+- `STOP` arrête la stratégie
+
+### 4. Warmup explicite pour Coin5min
+Coin5min ne trade pas tant qu'il n'a pas accumulé assez d'historique spot.
+
+Le GUI affiche maintenant clairement :
+- `CONNECTING`
+- `WARMING`
+- `RUNNING`
+- `PAUSED`
+- `STOPPED`
+
+Avec une barre de warmup par actif.
+
+---
+
+## Structure des fichiers
+
+- `cyborg_dash.py` : GUI Dash
+- `data_manager.py` : état central + boucles live + paper trading
+- `paper_trading.py` : moteur d'ordres papier
+- `model_engine.py` : ancien moteur de modèles, conservé dans le projet
+- `api_connectors.py` : connecteurs avancés, conservés dans le projet
+- `STRATEGIES.md` : documentation d'origine
+
+---
+
+## Lancement
+
+```bash
+pip install -r requirements.txt
+python cyborg_dash.py
+```
+
+Puis ouvrir :
+
+```bash
+http://localhost:8050
+```
+
+---
+
+## Workflow recommandé
+
+### Étape 1 – Configurer la session paper
+Onglet `Dashboard` :
+- choisis `Capital total`
+- choisis `Allocation BetMiss (%)`
+- choisis `Allocation Coin5min (%)`
+- clique `APPLIQUER & RESET PAPER`
+
+Important :
+- la somme des allocations doit être `<= 100%`
+- ce bouton remet la session paper à zéro
+- il arrête aussi les stratégies en cours
+
+### Étape 2 – Lancer BetMiss ou Coin5min
+Va sur l'onglet voulu puis clique `START`.
+
+### Étape 3 – Modifier les paramètres en live
+Les paramètres de stratégie sont pris en compte directement, sans rerender complet de la page.
+
+---
+
+## Paramètres disponibles
+
+## Dashboard
+
+### Capital total
+Capital de référence du portefeuille paper.
+
+Exemple :
+- `10000` = portefeuille paper de 10 000 $
+
+### Allocation BetMiss / Coin5min
+Part maximale du capital réservée à chaque stratégie.
+
+Exemple :
+- capital = 10 000
+- BetMiss = 40%
+- Coin5min = 35%
+
+Alors :
+- BetMiss travaille sur une enveloppe théorique de 4 000 $
+- Coin5min travaille sur une enveloppe théorique de 3 500 $
+- 25% restent non alloués
+
+---
+
+## BetMiss
+
+### Seuil edge min
+Seuil minimal d'arbitrage avant de considérer l'opportunité comme tradable.
+
+Exemple :
+- `2.0%` = on ignore toute opportunité < 2%
+
+### Taille / trade
+Pourcentage de l'allocation BetMiss utilisé par opportunité.
+
+Exemple :
+- capital = 10 000
+- allocation BetMiss = 50%
+- enveloppe BetMiss = 5 000
+- taille/trade = 2%
+
+Alors une opportunité BetMiss utilisera :
+- `5000 × 2% = 100 $`
+
+### Fonctionnement actuel BetMiss
+La boucle live :
+- interroge Polymarket
+- interroge Kalshi Demo
+- tente de faire un matching simple des questions
+- détecte un arbitrage si YES d'un côté + NO de l'autre < 1
+- si le meilleur edge dépasse le seuil, la stratégie logue un trade paper avec profit théorique immédiat
+
+Remarque importante :
+- le matching cross-platform reste volontairement simple
+- il peut ne rien trouver pendant longtemps sur des données réelles
+
+---
+
+## Coin5min
+
+### Confiance min
+Seuil minimal de confiance du signal.
+
+Exemple :
+- `60%` = pas de trade si la confiance est plus faible
+
+### Taille / trade
+Pourcentage de l'allocation Coin5min utilisé par trade.
+
+Exemple :
+- capital = 10 000
+- allocation Coin5min = 50%
+- enveloppe Coin5min = 5 000
+- taille/trade = 2%
+
+Alors un trade Coin5min utilise :
+- `5000 × 2% = 100 $`
+
+### Intervalle
+Version reconstruite :
+- `1 min`
+- `5 min`
+- `15 min`
+
+Ce paramètre sert à :
+- choisir la granularité de warmup côté spot
+- définir la durée de résolution du trade paper
+
+### Actifs
+Actifs spot suivis :
+- BTC
+- ETH
+- SOL
+- XRP
+- DOGE
+
+### Fonctionnement actuel Coin5min
+Quand tu cliques `START` :
+1. la stratégie démarre en `CONNECTING`
+2. elle récupère les chandelles spot de warmup côté Coinbase
+3. elle passe en `WARMING`
+4. une fois le warmup suffisant, elle cherche les marchés `Up or Down` sur Polymarket
+5. elle calcule un signal
+6. si le signal est actionable, elle place un trade paper
+7. le trade est résolu à l'échéance avec le spot observé à la fin de l'intervalle
+
+### Résolution des trades Coin5min
+La résolution se fait à partir du spot réel observé à l'expiration de la fenêtre.
+
+Règle :
+- si spot final > spot d'entrée → outcome `YES`
+- sinon → outcome `NO`
+
+---
+
+## Ce que montre le GUI
+
+## Dashboard
+- valeur totale paper
+- PnL total
+- nombre de trades
+- win rate
+- courbe PnL
+- historique récent des trades
+
+## BetMiss
+- état de la stratégie
+- opportunités live détectées
+- historique des trades BetMiss
+
+## Coin5min
+- état de la stratégie
+- warmup par actif
+- chart spot / prix YES / confiance
+- tableau spot / signal / carnet
+- historique des trades Coin5min
+
+## Alertes
+Journal système complet.
+
+---
+
+## Pourquoi tu voyais des données avant alors que tu n'avais rien lancé
+
+Dans l'ancienne version :
+- `start_workers()` appelait une fonction qui injectait immédiatement des données simulées
+- les graphiques et tables affichaient donc déjà des marchés et des trades
+- visuellement, on avait l'impression que les stratégies étaient déjà parties
+
+Ce n'est plus le cas ici.
+
+---
+
+## Limites de cette version
+
+### 1. BetMiss
+Le matching Polymarket / Kalshi n'est pas encore un moteur de normalisation sémantique robuste.
+Donc :
+- certaines opportunités réelles peuvent être ratées
+- la stratégie peut souvent afficher zéro opportunité
+
+### 2. Coin5min
+Le signal actuel est volontairement simple et robuste.
+Il n'essaie pas de forcer à tout prix le pipeline EGARCH/Kalman si ton environnement Python n'a pas toutes les dépendances numériques installées proprement.
+
+### 3. Pas d'exécution réelle
+Cette version reste strictement en paper trading.
+
+---
+
+## Conseils de test
+
+### Test Coin5min
+1. mets capital = 10000
+2. mets allocation Coin5min = 50
+3. mets confiance = 60
+4. garde ETH + BTC + SOL
+5. clique `START`
+6. vérifie le passage `CONNECTING -> WARMING -> RUNNING`
+7. laisse tourner plusieurs minutes
+
+### Test BetMiss
+1. mets allocation BetMiss = 50
+2. edge min = 2%
+3. taille/trade = 2%
+4. clique `START`
+5. surveille le tableau d'opportunités
+
+---
+
+## Débogage rapide
+
+### Le statut reste `WARMING`
+Ca veut dire qu'il manque encore des points d'historique ou qu'aucun marché Polymarket compatible n'a été trouvé pour l'actif.
+
+### Le statut reste `CONNECTING`
+Ca veut dire qu'un endpoint live ne répond pas ou répond trop lentement.
+
+### Aucun trade n'apparaît
+Ca peut être normal si :
+- aucune opportunité BetMiss n'est détectée
+- aucun signal Coin5min n'est actionable
+- le warmup n'est pas terminé
+
+---
+
+## Dépendances minimales
+
+- dash
+- plotly
+- pandas
+- numpy
+- httpx
+
+Voir `requirements.txt`.

@@ -1,0 +1,927 @@
+"""
+data_manager.py – runtime state + live paper trading loops for CYBORG
+
+Goals of this rewrite:
+- no fake trades or markets injected on startup
+- Start really starts a live paper loop
+- controls are updated explicitly from the GUI
+- capital and allocations are configurable
+- Coin5min has a visible warmup stage before trading
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import sqlite3
+import threading
+import time
+from collections import defaultdict, deque
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Deque, Dict, List, Optional, Tuple
+
+import httpx
+import numpy as np
+import pandas as pd
+
+from paper_trading import PaperTradingEngine
+
+logger = logging.getLogger("cyborg.data")
+DB = "cyborg.db"
+
+
+# ============================================================
+# Persistence helpers (backtest history table kept for compatibility)
+# ============================================================
+
+def init_db():
+    conn = sqlite3.connect(DB)
+    conn.execute(
+        """CREATE TABLE IF NOT EXISTS backtest_results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            strategy TEXT,
+            params TEXT,
+            total_pnl REAL,
+            n_trades INTEGER,
+            win_rate REAL,
+            sharpe REAL,
+            max_drawdown REAL,
+            roi REAL,
+            created_at REAL
+        )"""
+    )
+    conn.commit()
+    conn.close()
+
+
+# ============================================================
+# Utility helpers
+# ============================================================
+
+def _now_str(ts: Optional[float] = None) -> str:
+    return datetime.fromtimestamp(ts or time.time()).strftime("%H:%M:%S")
+
+
+def _normalize_question(q: str) -> str:
+    q = (q or "").lower()
+    keep = []
+    for ch in q:
+        keep.append(ch if ch.isalnum() or ch.isspace() else " ")
+    return " ".join("".join(keep).split())
+
+
+def _detect_asset(text: str) -> str:
+    q = (text or "").lower()
+    mapping = [
+        ("bitcoin", "BTC"), ("btc", "BTC"),
+        ("ethereum", "ETH"), ("eth", "ETH"),
+        ("solana", "SOL"), ("sol", "SOL"),
+        ("xrp", "XRP"),
+        ("dogecoin", "DOGE"), ("doge", "DOGE"),
+    ]
+    for key, asset in mapping:
+        if key in q:
+            return asset
+    return "?"
+
+
+def _extract_yes_price(market: Dict) -> float:
+    prices = market.get("outcomePrices", "[]")
+    if isinstance(prices, str):
+        try:
+            prices = json.loads(prices)
+        except Exception:
+            prices = []
+    try:
+        return float(prices[0]) if prices else 0.5
+    except Exception:
+        return 0.5
+
+
+def _safe_float(x, default=0.0) -> float:
+    try:
+        return float(x)
+    except Exception:
+        return default
+
+
+def _coinbase_granularity(interval_min: int) -> int:
+    mapping = {1: 60, 5: 300, 15: 900}
+    return mapping.get(int(interval_min), 300)
+
+
+# ============================================================
+# HTTP client helpers
+# ============================================================
+
+class PublicFeeds:
+    def __init__(self, timeout: float = 6.0):
+        self.client = httpx.Client(timeout=timeout, headers={"User-Agent": "cyborg-paper-live/1.0"})
+
+    def get_polymarket_markets(self, limit: int = 100) -> List[Dict]:
+        resp = self.client.get(
+            "https://gamma-api.polymarket.com/markets",
+            params={
+                "active": "true",
+                "closed": "false",
+                "limit": limit,
+                "order": "volume24hr",
+                "ascending": "false",
+            },
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+    def get_polymarket_orderbook(self, token_id: str) -> Dict:
+        resp = self.client.get("https://clob.polymarket.com/book", params={"token_id": token_id})
+        resp.raise_for_status()
+        return resp.json()
+
+    def get_kalshi_markets(self, limit: int = 100) -> List[Dict]:
+        resp = self.client.get(
+            "https://demo-api.kalshi.co/trade-api/v2/markets",
+            params={"limit": limit, "status": "open"},
+        )
+        resp.raise_for_status()
+        payload = resp.json()
+        return payload.get("markets", []) if isinstance(payload, dict) else []
+
+    def get_coinbase_ticker(self, product_id: str) -> Dict:
+        resp = self.client.get(f"https://api.exchange.coinbase.com/products/{product_id}/ticker")
+        resp.raise_for_status()
+        return resp.json()
+
+    def get_coinbase_candles(self, product_id: str, granularity: int) -> List[List[float]]:
+        resp = self.client.get(
+            f"https://api.exchange.coinbase.com/products/{product_id}/candles",
+            params={"granularity": granularity},
+        )
+        resp.raise_for_status()
+        rows = resp.json()
+        rows.sort(key=lambda r: r[0])
+        return rows
+
+
+# ============================================================
+# Strategy state models
+# ============================================================
+
+@dataclass
+class StrategyRuntime:
+    active: bool = False
+    paused: bool = False
+    status: str = "stopped"  # stopped / connecting / warming / running / paused / error
+    last_action: str = "Not started"
+    last_update_ts: float = 0.0
+    last_error: str = ""
+    started_at: Optional[float] = None
+
+
+@dataclass
+class BetMissState(StrategyRuntime):
+    min_edge_pct: float = 2.0
+    trade_size_pct: float = 2.0
+    allocation_pct: float = 50.0
+    opportunities: List[Dict] = field(default_factory=list)
+
+
+@dataclass
+class Coin5MinState(StrategyRuntime):
+    min_confidence_pct: float = 60.0
+    interval_min: int = 5
+    trade_size_pct: float = 2.0
+    allocation_pct: float = 50.0
+    assets: List[str] = field(default_factory=lambda: ["BTC", "ETH", "SOL"])
+    warmup_required: int = 100
+    signals: Dict[str, Dict] = field(default_factory=dict)
+    markets: List[Dict] = field(default_factory=list)
+    orderbooks: Dict[str, Dict] = field(default_factory=dict)
+    spot_rows: Dict[str, Dict] = field(default_factory=dict)
+    open_trade_ids: Dict[str, str] = field(default_factory=dict)
+    open_trade_meta: Dict[str, Dict] = field(default_factory=dict)
+
+
+# ============================================================
+# Thread-safe live state
+# ============================================================
+
+class LiveState:
+    def __init__(self):
+        self._lock = threading.RLock()
+        self._started = False
+        self._stop_event = threading.Event()
+
+        self.mode = "paper_live"
+        self.capital = 10000.0
+        self.allocations = {"betmiss": 50.0, "coin5min": 50.0}
+
+        self.platforms: Dict[str, Dict] = {
+            "polymarket": {"status": "disconnected", "latency": None, "requests": 0, "errors": 0},
+            "kalshi": {"status": "disconnected", "latency": None, "requests": 0, "errors": 0},
+            "coinbase": {"status": "disconnected", "latency": None, "requests": 0, "errors": 0},
+        }
+
+        self.betmiss = BetMissState()
+        self.coin5min = Coin5MinState()
+
+        self.recent_trades: List[Dict] = []
+        self.alerts: List[Dict] = []
+        self.live_markets: List[Dict] = []
+        self.last_tick_ts: float = 0.0
+
+        self.price_history: Dict[str, Deque[Tuple[float, float]]] = defaultdict(lambda: deque(maxlen=600))
+        self.paper = PaperTradingEngine(initial_capital=self.capital, db_path=":memory:")
+        self.betmiss_realized_pnl = 0.0
+
+        self.feeds = PublicFeeds(timeout=6.0)
+
+    # ---------- state snapshots ----------
+    def snap(self) -> Dict:
+        with self._lock:
+            metrics = self.paper.get_metrics()
+            total_pnl = metrics["total_pnl"] + self.betmiss_realized_pnl
+            return {
+                "mode": self.mode,
+                "capital": self.capital,
+                "allocations": dict(self.allocations),
+                "platforms": {k: dict(v) for k, v in self.platforms.items()},
+                "betmiss": {
+                    **self.betmiss.__dict__,
+                    "opportunities": list(self.betmiss.opportunities),
+                },
+                "coin5min": {
+                    **self.coin5min.__dict__,
+                    "signals": {k: dict(v) for k, v in self.coin5min.signals.items()},
+                    "markets": list(self.coin5min.markets),
+                    "orderbooks": {k: dict(v) for k, v in self.coin5min.orderbooks.items()},
+                    "spot_rows": {k: dict(v) for k, v in self.coin5min.spot_rows.items()},
+                    "open_trade_ids": dict(self.coin5min.open_trade_ids),
+                    "open_trade_meta": {k: dict(v) for k, v in self.coin5min.open_trade_meta.items()},
+                    "warmup_points": {a: len(self.price_history[a]) for a in self.coin5min.assets},
+                    "price_history": {
+                        a: [{"ts": ts, "price": price} for ts, price in list(self.price_history[a])[-180:]]
+                        for a in self.coin5min.assets
+                    },
+                },
+                "portfolio": {
+                    **metrics,
+                    "total_pnl": total_pnl,
+                    "total_value": self.capital + total_pnl,
+                },
+                "recent_trades": list(self.recent_trades),
+                "alerts": list(self.alerts[:120]),
+                "live_markets": list(self.live_markets),
+                "last_tick_ts": self.last_tick_ts,
+            }
+
+    def alert(self, level: str, strat: str, msg: str):
+        with self._lock:
+            self.alerts.insert(0, {"time": _now_str(), "level": level, "strat": strat, "msg": msg})
+            self.alerts = self.alerts[:200]
+
+    # ---------- configuration ----------
+    def reset_session(self, capital: Optional[float] = None, bm_alloc: Optional[float] = None, c5_alloc: Optional[float] = None) -> Tuple[bool, str]:
+        with self._lock:
+            if capital is not None and capital <= 0:
+                return False, "Le capital doit être > 0."
+            if bm_alloc is not None and not (0 <= bm_alloc <= 100):
+                return False, "Allocation BetMiss invalide."
+            if c5_alloc is not None and not (0 <= c5_alloc <= 100):
+                return False, "Allocation Coin5min invalide."
+            if bm_alloc is not None and c5_alloc is not None and bm_alloc + c5_alloc > 100:
+                return False, "La somme des allocations doit être ≤ 100%."
+
+            self._stop_strategies_locked(clear_runtime=False)
+
+            if capital is not None:
+                self.capital = float(capital)
+            if bm_alloc is not None:
+                self.allocations["betmiss"] = float(bm_alloc)
+                self.betmiss.allocation_pct = float(bm_alloc)
+            if c5_alloc is not None:
+                self.allocations["coin5min"] = float(c5_alloc)
+                self.coin5min.allocation_pct = float(c5_alloc)
+
+            self.paper = PaperTradingEngine(initial_capital=self.capital, db_path=":memory:")
+            self.betmiss_realized_pnl = 0.0
+            self.recent_trades = []
+            self.live_markets = []
+            self.price_history = defaultdict(lambda: deque(maxlen=600))
+            self.coin5min.signals = {}
+            self.coin5min.markets = []
+            self.coin5min.orderbooks = {}
+            self.coin5min.spot_rows = {}
+            self.coin5min.open_trade_ids = {}
+            self.coin5min.open_trade_meta = {}
+            for p in self.platforms.values():
+                p.update({"status": "disconnected", "latency": None, "requests": 0, "errors": 0})
+
+        self.alert("INFO", "SYS", f"Session paper réinitialisée | capital=${self.capital:,.0f} | BM {self.allocations['betmiss']:.0f}% | C5 {self.allocations['coin5min']:.0f}%")
+        return True, "Session paper réinitialisée."
+
+    def update_betmiss_params(self, min_edge_pct: Optional[float] = None, trade_size_pct: Optional[float] = None):
+        with self._lock:
+            if min_edge_pct is not None:
+                self.betmiss.min_edge_pct = float(min_edge_pct)
+            if trade_size_pct is not None:
+                self.betmiss.trade_size_pct = float(trade_size_pct)
+            self.betmiss.last_action = f"Params mis à jour à {_now_str()}"
+
+    def update_coin5min_params(
+        self,
+        min_confidence_pct: Optional[float] = None,
+        interval_min: Optional[int] = None,
+        assets: Optional[List[str]] = None,
+        trade_size_pct: Optional[float] = None,
+    ):
+        with self._lock:
+            restart_warmup = False
+            if min_confidence_pct is not None:
+                self.coin5min.min_confidence_pct = float(min_confidence_pct)
+            if trade_size_pct is not None:
+                self.coin5min.trade_size_pct = float(trade_size_pct)
+            if interval_min is not None and int(interval_min) != self.coin5min.interval_min:
+                self.coin5min.interval_min = int(interval_min)
+                restart_warmup = True
+            if assets is not None:
+                assets = list(dict.fromkeys(assets))
+                if assets != self.coin5min.assets:
+                    self.coin5min.assets = assets
+                    restart_warmup = True
+            if restart_warmup:
+                self.price_history = defaultdict(lambda: deque(maxlen=600))
+                self.coin5min.signals = {}
+                self.coin5min.spot_rows = {}
+                self.coin5min.markets = []
+                self.coin5min.orderbooks = {}
+                if self.coin5min.active:
+                    self.coin5min.status = "warming"
+                    self.coin5min.last_action = f"Warmup relancé à {_now_str()}"
+            else:
+                self.coin5min.last_action = f"Params mis à jour à {_now_str()}"
+
+    # ---------- strategy lifecycle ----------
+    def start_strategy(self, strategy: str):
+        with self._lock:
+            if strategy == "betmiss":
+                self.betmiss.active = True
+                self.betmiss.paused = False
+                self.betmiss.status = "connecting"
+                self.betmiss.started_at = time.time()
+                self.betmiss.last_action = f"Start à {_now_str()}"
+                self.betmiss.last_error = ""
+                self.betmiss.opportunities = []
+                self.platforms["polymarket"]["status"] = "connecting"
+                self.platforms["kalshi"]["status"] = "connecting"
+            elif strategy == "coin5min":
+                self.coin5min.active = True
+                self.coin5min.paused = False
+                self.coin5min.status = "connecting"
+                self.coin5min.started_at = time.time()
+                self.coin5min.last_action = f"Start à {_now_str()}"
+                self.coin5min.last_error = ""
+                self.coin5min.signals = {}
+                self.coin5min.markets = []
+                self.coin5min.orderbooks = {}
+                self.coin5min.spot_rows = {}
+                self.coin5min.open_trade_ids = {}
+                self.coin5min.open_trade_meta = {}
+                self.price_history = defaultdict(lambda: deque(maxlen=600))
+                self.live_markets = []
+                self.platforms["polymarket"]["status"] = "connecting"
+                self.platforms["coinbase"]["status"] = "connecting"
+            else:
+                raise ValueError(f"Unknown strategy: {strategy}")
+        self.alert("INFO", strategy.upper(), f"{strategy} démarrée")
+
+    def pause_strategy(self, strategy: str):
+        with self._lock:
+            s = self.betmiss if strategy == "betmiss" else self.coin5min
+            if not s.active:
+                return
+            s.paused = not s.paused
+            s.status = "paused" if s.paused else "running"
+            s.last_action = f"{'Pause' if s.paused else 'Reprise'} à {_now_str()}"
+        self.alert("INFO", strategy.upper(), s.last_action)
+
+    def stop_strategy(self, strategy: str):
+        with self._lock:
+            self._stop_one_locked(strategy)
+        self.alert("INFO", strategy.upper(), f"{strategy} arrêtée")
+
+    def _stop_one_locked(self, strategy: str):
+        s = self.betmiss if strategy == "betmiss" else self.coin5min
+        s.active = False
+        s.paused = False
+        s.status = "stopped"
+        s.last_action = f"Stop à {_now_str()}"
+        if strategy == "betmiss":
+            s.opportunities = []
+            self.platforms["kalshi"]["status"] = "disconnected"
+        else:
+            s.signals = {}
+            s.markets = []
+            s.orderbooks = {}
+            s.spot_rows = {}
+            self.live_markets = []
+            self.platforms["coinbase"]["status"] = "disconnected"
+        self.platforms["polymarket"]["status"] = "disconnected"
+
+    def _stop_strategies_locked(self, clear_runtime: bool = False):
+        self._stop_one_locked("betmiss")
+        self._stop_one_locked("coin5min")
+        if clear_runtime:
+            self.recent_trades = []
+            self.live_markets = []
+            self.coin5min.open_trade_ids = {}
+            self.coin5min.open_trade_meta = {}
+
+
+ST = LiveState()
+
+
+# ============================================================
+# Connectors parsing helpers
+# ============================================================
+
+def _parse_polymarket_markets(raw_markets: List[Dict]) -> List[Dict]:
+    out = []
+    for m in raw_markets:
+        q = m.get("question", "")
+        asset = _detect_asset(q)
+        token_ids = m.get("clobTokenIds", [])
+        if isinstance(token_ids, str):
+            try:
+                token_ids = json.loads(token_ids)
+            except Exception:
+                token_ids = []
+        out.append(
+            {
+                "platform": "polymarket",
+                "market_id": str(m.get("conditionId") or m.get("id") or m.get("slug") or ""),
+                "question": q,
+                "question_norm": _normalize_question(q),
+                "asset": asset,
+                "yes_price": _extract_yes_price(m),
+                "no_price": 1 - _extract_yes_price(m),
+                "token_yes": token_ids[0] if len(token_ids) >= 1 else None,
+                "token_no": token_ids[1] if len(token_ids) >= 2 else None,
+                "volume_24h": _safe_float(m.get("volume24hr", 0)),
+                "liquidity": _safe_float(m.get("liquidity", 0)),
+            }
+        )
+    return out
+
+
+def _parse_kalshi_markets(raw_markets: List[Dict]) -> List[Dict]:
+    out = []
+    for m in raw_markets:
+        q = m.get("title") or m.get("subtitle") or m.get("question") or m.get("ticker") or ""
+        yes_bid = _safe_float(m.get("yes_bid") or m.get("yes_ask") or m.get("last_price") or 50, 50.0) / 100.0
+        no_bid = 1 - yes_bid
+        out.append(
+            {
+                "platform": "kalshi",
+                "market_id": str(m.get("ticker", "")),
+                "question": q,
+                "question_norm": _normalize_question(q),
+                "asset": _detect_asset(q),
+                "yes_price": yes_bid,
+                "no_price": no_bid,
+                "volume_24h": _safe_float(m.get("volume", 0)),
+                "liquidity": _safe_float(m.get("open_interest", 0)),
+            }
+        )
+    return out
+
+
+def _choose_coin_markets(asset: str, markets: List[Dict]) -> Optional[Dict]:
+    candidates = []
+    for m in markets:
+        q = m["question"].lower()
+        if m.get("asset") == asset and "up or down" in q:
+            score = m.get("volume_24h", 0) + m.get("liquidity", 0)
+            candidates.append((score, m))
+    if not candidates:
+        return None
+    candidates.sort(key=lambda x: x[0], reverse=True)
+    return candidates[0][1]
+
+
+def _simple_match_key(question: str) -> str:
+    q = _normalize_question(question)
+    for chunk in ["up or down", "will", " by ", " tomorrow", " today", " this week"]:
+        q = q.replace(chunk, " ")
+    return " ".join(q.split())
+
+
+# ============================================================
+# Strategy logic helpers
+# ============================================================
+
+def _coin_signal_from_prices(prices: List[float], market_yes: float, min_conf_pct: float) -> Optional[Dict]:
+    if len(prices) < 100:
+        return None
+    arr = np.array(prices, dtype=float)
+    rets = np.diff(np.log(arr[-60:]))
+    if len(rets) < 10:
+        return None
+
+    momentum = float(np.mean(rets[-12:]))
+    sigma = float(np.std(rets[-40:])) or 1e-6
+    z = abs(momentum) / sigma
+    confidence = float(min(0.95, 0.5 + 0.08 * z))
+    direction = "up" if momentum >= 0 else "down"
+    edge = confidence - market_yes if direction == "up" else confidence - (1 - market_yes)
+    signal = {
+        "direction": direction,
+        "confidence": confidence,
+        "edge": edge,
+        "sigma_5min": sigma,
+        "kalman_trend": arr[-1] * (1 + momentum),
+        "current_price": arr[-1],
+        "market_yes_price": market_yes,
+        "actionable": confidence * 100 >= min_conf_pct and edge > 0,
+    }
+    return signal
+
+
+def _record_trade_row(order_id: str, strategy: str, asset: str, side: str, price: float, size: float, status: str, pnl: float = 0.0, confidence: Optional[float] = None, edge: Optional[float] = None, note: str = "") -> Dict:
+    return {
+        "id": order_id,
+        "time": _now_str(),
+        "timestamp": time.time(),
+        "strategy": strategy,
+        "asset": asset,
+        "side": side.upper(),
+        "price": round(price, 4),
+        "size": round(size, 2),
+        "pnl": round(pnl, 2),
+        "status": status,
+        "confidence": round(confidence, 4) if confidence is not None else None,
+        "edge": round(edge, 4) if edge is not None else None,
+        "latency": 0.0,
+        "note": note,
+    }
+
+
+# ============================================================
+# Main runtime loop
+# ============================================================
+
+def _poll_polymarket_markets() -> List[Dict]:
+    t0 = time.time()
+    raw = ST.feeds.get_polymarket_markets(limit=120)
+    latency = (time.time() - t0) * 1000
+    with ST._lock:
+        ST.platforms["polymarket"]["status"] = "connected"
+        ST.platforms["polymarket"]["latency"] = round(latency, 1)
+        ST.platforms["polymarket"]["requests"] += 1
+    return _parse_polymarket_markets(raw)
+
+
+def _poll_kalshi_markets() -> List[Dict]:
+    t0 = time.time()
+    raw = ST.feeds.get_kalshi_markets(limit=120)
+    latency = (time.time() - t0) * 1000
+    with ST._lock:
+        ST.platforms["kalshi"]["status"] = "connected"
+        ST.platforms["kalshi"]["latency"] = round(latency, 1)
+        ST.platforms["kalshi"]["requests"] += 1
+    return _parse_kalshi_markets(raw)
+
+
+def _poll_coinbase_ticker(asset: str, interval_min: int) -> Dict:
+    product_id = f"{asset}-USD"
+    # warmup candles first
+    history = ST.price_history[asset]
+    if len(history) < ST.coin5min.warmup_required:
+        granularity = _coinbase_granularity(interval_min)
+        t0 = time.time()
+        candles = ST.feeds.get_coinbase_candles(product_id, granularity=granularity)
+        latency = (time.time() - t0) * 1000
+        with ST._lock:
+            ST.platforms["coinbase"]["status"] = "connected"
+            ST.platforms["coinbase"]["latency"] = round(latency, 1)
+            ST.platforms["coinbase"]["requests"] += 1
+        for row in candles[-ST.coin5min.warmup_required :]:
+            ts, _low, _high, _open, close, _vol = row
+            history.append((float(ts), float(close)))
+
+    t0 = time.time()
+    ticker = ST.feeds.get_coinbase_ticker(product_id)
+    latency = (time.time() - t0) * 1000
+    price = _safe_float(ticker.get("price"), np.nan)
+    bid = _safe_float(ticker.get("bid"), price)
+    ask = _safe_float(ticker.get("ask"), price)
+    ts = time.time()
+    with ST._lock:
+        ST.platforms["coinbase"]["status"] = "connected"
+        ST.platforms["coinbase"]["latency"] = round(latency, 1)
+        ST.platforms["coinbase"]["requests"] += 1
+    if np.isfinite(price):
+        history.append((ts, float(price)))
+    return {"asset": asset, "price": float(price), "bid": float(bid), "ask": float(ask), "timestamp": ts}
+
+
+def _sync_trade_row(order_id: str, pnl: float, status: str, note: str = ""):
+    with ST._lock:
+        for row in ST.recent_trades:
+            if row.get("id") == order_id:
+                row["pnl"] = round(pnl, 2)
+                row["status"] = status
+                if note:
+                    row["note"] = note
+                row["time"] = _now_str()
+                row["timestamp"] = time.time()
+                break
+
+
+def _run_coin5min_cycle():
+    with ST._lock:
+        c5 = ST.coin5min
+        if not c5.active:
+            return
+        if c5.paused:
+            c5.status = "paused"
+            return
+        c5.status = "connecting" if c5.status == "stopped" else c5.status
+        assets = list(c5.assets)
+        interval_min = c5.interval_min
+        min_conf = c5.min_confidence_pct
+        allocation_pct = c5.allocation_pct
+        trade_size_pct = c5.trade_size_pct
+
+    markets = _poll_polymarket_markets()
+    with ST._lock:
+        c5.markets = []
+        ST.live_markets = []
+
+    all_warm = True
+    for asset in assets:
+        spot = _poll_coinbase_ticker(asset, interval_min)
+        mkt = _choose_coin_markets(asset, markets)
+        with ST._lock:
+            c5.spot_rows[asset] = spot
+        warm_points = len(ST.price_history[asset])
+        if warm_points < c5.warmup_required:
+            all_warm = False
+            continue
+        if not mkt:
+            all_warm = False
+            continue
+        with ST._lock:
+            c5.markets.append(mkt)
+            ST.live_markets.append(mkt)
+
+        prices = [p for _ts, p in ST.price_history[asset]]
+        signal = _coin_signal_from_prices(prices, mkt["yes_price"], min_conf)
+        if signal:
+            with ST._lock:
+                c5.signals[asset] = {
+                    **signal,
+                    "asset": asset,
+                    "warmup_points": warm_points,
+                    "timestamp": time.time(),
+                }
+
+        # order book is optional; if unavailable, keep last known or an empty dict
+        if mkt.get("token_yes"):
+            try:
+                book = ST.feeds.get_polymarket_orderbook(mkt["token_yes"])
+                bids = book.get("bids", [])
+                asks = book.get("asks", [])
+                with ST._lock:
+                    c5.orderbooks[asset] = {
+                        "best_bid": float(bids[0]["price"]) if bids else None,
+                        "best_ask": float(asks[0]["price"]) if asks else None,
+                        "bid_depth": sum(float(x.get("size", 0)) for x in bids[:8]),
+                        "ask_depth": sum(float(x.get("size", 0)) for x in asks[:8]),
+                    }
+            except Exception:
+                pass
+
+        # resolve prior trade if expired
+        with ST._lock:
+            open_id = c5.open_trade_ids.get(asset)
+            open_meta = c5.open_trade_meta.get(asset)
+        if open_id and open_meta and time.time() >= open_meta["expiry_ts"]:
+            outcome = "yes" if spot["price"] > open_meta["entry_spot"] else "no"
+            order = ST.paper.resolve_trade(open_id, outcome)
+            if order:
+                status = "WIN" if order.pnl > 0 else "LOSS"
+                _sync_trade_row(open_id, order.pnl, status, note=f"expiry spot={spot['price']:.2f}")
+            with ST._lock:
+                c5.open_trade_ids.pop(asset, None)
+                c5.open_trade_meta.pop(asset, None)
+
+        # place new trade if no open position
+        with ST._lock:
+            open_exists = asset in c5.open_trade_ids
+        if signal and signal.get("actionable") and not open_exists:
+            size = ST.capital * (allocation_pct / 100.0) * (trade_size_pct / 100.0)
+            if size >= 1.0:
+                side = "yes" if signal["direction"] == "up" else "no"
+                order = ST.paper.place_order(
+                    strategy="coin5min",
+                    platform="polymarket",
+                    market_id=mkt["market_id"],
+                    question=mkt["question"],
+                    side=side,
+                    market_price=mkt["yes_price"] if side == "yes" else mkt["no_price"],
+                    size=size,
+                    asset=asset,
+                    direction=signal["direction"],
+                    confidence=signal["confidence"],
+                    edge=signal["edge"],
+                )
+                if order:
+                    row = _record_trade_row(
+                        order.id,
+                        "coin5min",
+                        asset,
+                        side,
+                        order.price,
+                        order.size,
+                        "OPEN",
+                        pnl=0.0,
+                        confidence=signal["confidence"],
+                        edge=signal["edge"],
+                        note=f"spot entry={spot['price']:.2f}",
+                    )
+                    with ST._lock:
+                        ST.recent_trades.insert(0, row)
+                        c5.open_trade_ids[asset] = order.id
+                        c5.open_trade_meta[asset] = {
+                            "entry_spot": spot["price"],
+                            "entry_ts": time.time(),
+                            "expiry_ts": time.time() + interval_min * 60,
+                            "market_question": mkt["question"],
+                        }
+
+    with ST._lock:
+        if not assets:
+            c5.status = "stopped"
+        elif any(len(ST.price_history[a]) < c5.warmup_required for a in assets):
+            c5.status = "warming"
+        elif not c5.markets:
+            c5.status = "warming"
+        else:
+            c5.status = "running"
+        c5.last_update_ts = time.time()
+
+
+def _run_betmiss_cycle():
+    with ST._lock:
+        bm = ST.betmiss
+        if not bm.active:
+            return
+        if bm.paused:
+            bm.status = "paused"
+            return
+        bm.status = "connecting" if bm.status == "stopped" else bm.status
+        min_edge = bm.min_edge_pct / 100.0
+        allocation_pct = bm.allocation_pct
+        trade_size_pct = bm.trade_size_pct
+
+    pm = _poll_polymarket_markets()
+    ks = _poll_kalshi_markets()
+
+    pm_by_key = defaultdict(list)
+    ks_by_key = defaultdict(list)
+    for m in pm:
+        pm_by_key[_simple_match_key(m["question"])] .append(m)
+    for m in ks:
+        ks_by_key[_simple_match_key(m["question"])] .append(m)
+
+    opportunities: List[Dict] = []
+    for key, pm_list in pm_by_key.items():
+        if key not in ks_by_key or not key:
+            continue
+        for a in pm_list:
+            for b in ks_by_key[key]:
+                combos = [
+                    ("pm_yes_ks_no", a["yes_price"] + b["no_price"], "polymarket", "kalshi", a, b),
+                    ("ks_yes_pm_no", b["yes_price"] + a["no_price"], "kalshi", "polymarket", b, a),
+                ]
+                for label, total_cost, buy_yes_on, buy_no_on, yes_mkt, no_mkt in combos:
+                    edge = 1.0 - total_cost
+                    if edge <= min_edge:
+                        continue
+                    opp = {
+                        "event": yes_mkt["question"],
+                        "asset": yes_mkt.get("asset") or no_mkt.get("asset") or "?",
+                        "buy_yes_on": buy_yes_on,
+                        "buy_no_on": buy_no_on,
+                        "yes_price": round(yes_mkt["yes_price"], 4),
+                        "no_price": round(no_mkt["no_price"], 4),
+                        "edge": round(edge, 4),
+                        "label": label,
+                    }
+                    opportunities.append(opp)
+
+    opportunities.sort(key=lambda x: x["edge"], reverse=True)
+    opportunities = opportunities[:12]
+
+    with ST._lock:
+        bm.opportunities = opportunities
+        bm.last_update_ts = time.time()
+        bm.status = "running" if opportunities or (pm and ks) else "connecting"
+
+    # auto paper-trade best opportunity if no identical event already logged recently
+    if opportunities:
+        best = opportunities[0]
+        size = ST.capital * (allocation_pct / 100.0) * (trade_size_pct / 100.0)
+        guaranteed_pnl = size * best["edge"]
+        row_id = f"BM-{int(time.time())}-{best['asset']}"
+        recent_same = False
+        with ST._lock:
+            for row in ST.recent_trades[:10]:
+                if row.get("id") == row_id:
+                    recent_same = True
+                    break
+        if not recent_same and size >= 1.0:
+            row = _record_trade_row(
+                row_id,
+                "betmiss",
+                best["asset"],
+                "arb",
+                best["yes_price"] + best["no_price"],
+                size,
+                "WIN",
+                pnl=guaranteed_pnl,
+                edge=best["edge"],
+                note=f"YES {best['buy_yes_on']} / NO {best['buy_no_on']}",
+            )
+            with ST._lock:
+                ST.betmiss_realized_pnl += guaranteed_pnl
+                ST.recent_trades.insert(0, row)
+
+
+def _runtime_loop():
+    while not ST._stop_event.is_set():
+        try:
+            any_active = False
+            with ST._lock:
+                any_active = ST.betmiss.active or ST.coin5min.active
+
+            if ST.betmiss.active:
+                _run_betmiss_cycle()
+            if ST.coin5min.active:
+                _run_coin5min_cycle()
+
+            if not any_active:
+                with ST._lock:
+                    ST.last_tick_ts = time.time()
+                time.sleep(1.0)
+                continue
+
+            with ST._lock:
+                ST.last_tick_ts = time.time()
+        except Exception as exc:
+            logger.exception("runtime loop error: %s", exc)
+            with ST._lock:
+                ST.platforms["polymarket"]["errors"] += 1
+            ST.alert("CRIT", "SYS", f"Erreur runtime: {exc}")
+        time.sleep(2.0)
+
+
+# ============================================================
+# Public API for dashboard
+# ============================================================
+
+def start_workers():
+    with ST._lock:
+        if ST._started:
+            return
+        ST._started = True
+    init_db()
+    threading.Thread(target=_runtime_loop, daemon=True).start()
+    ST.alert("INFO", "SYS", "Workers lancés. Aucune donnée live ne sera chargée avant Start.")
+
+
+def get_bt_history() -> pd.DataFrame:
+    try:
+        conn = sqlite3.connect(DB)
+        df = pd.read_sql(
+            "SELECT strategy,total_pnl,n_trades,win_rate,sharpe,max_drawdown,roi FROM backtest_results ORDER BY created_at DESC LIMIT 10",
+            conn,
+        )
+        conn.close()
+        return df
+    except Exception:
+        return pd.DataFrame()
+
+
+def get_pnl_curve() -> List[Dict]:
+    s = ST.snap()
+    trades = sorted(s["recent_trades"], key=lambda x: x.get("timestamp", 0))
+    curve = []
+    cum = 0.0
+    for t in trades:
+        cum += t.get("pnl", 0.0)
+        curve.append({"time": t.get("time", ""), "pnl": round(cum, 2), "strategy": t.get("strategy", "")})
+    return curve
+
